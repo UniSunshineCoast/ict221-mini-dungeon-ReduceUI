@@ -4,6 +4,7 @@ import javafx.scene.text.Text;
 
 public class GameEngine {
 
+    private Player player;
     /**
      * An example board to store the current game state.
      *
@@ -56,5 +57,16 @@ public class GameEngine {
     public static void main(String[] args) {
         GameEngine engine = new GameEngine(10);
         System.out.printf("The size of map is %d * %d\n", engine.getSize(), engine.getSize());
+
+        //print out a representation of the map to the console.
+        for (int i = 0; i < engine.getSize(); i++) {
+            for (int j = 0; j < engine.getSize(); j++) {
+                System.out.print(" _ "); //simplified representation.
+            }
+            System.out.println(); //newline
+        }
+        System.out.print("Command:");
+
+
     }
 }
