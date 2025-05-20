@@ -1,0 +1,59 @@
+package dungeon.engine;
+
+import java.util.Random;
+
+public class Map {
+
+    private Cell[][] map;
+    private int size;
+
+    public Map(int size) {
+        this.size = size;
+        this.map = new Cell[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                map[i][j] = new Cell();
+            }
+        }
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public Cell getCell(int x, int y) {
+        if (x < 0 || x >= size || y < 0 || y >= size) {
+            System.out.println("Out of bounds");
+            return null;
+        }
+        return map[x][y];
+    }
+
+    public void placePlayer(int x, int y) {
+        map[x][y].setPlayer(new Player(x, y));
+    }
+
+    public void placeLadder(int x, int y) {
+        Random rand = new Random();
+        do {
+            int ladderX = rand.nextInt(size);
+            int ladderY = rand.nextInt(size);
+        } while (!map[ladderX][ladderY].hasPlayer());
+    }
+
+    public void displayMap() {
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Cell cell = map[x][y];
+                if (cell.hasPlayer()){
+                    System.out.print(" P ");
+                } else if (cell.hasLadder()){
+                    System.out.print(" L ");
+                } else {
+                    System.out.print(" _ ");
+                }
+            }
+            System.out.println();
+        }
+    }
+}

@@ -1,16 +1,19 @@
 package dungeon.engine;
 
 import javafx.scene.text.Text;
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameEngine {
 
     private Player player;
-    /**
-     * An example board to store the current game state.
-     *
-     * Note: depending on your game, you might want to change this from 'int' to String or something?
-     */
     private Cell[][] map;
+    private int entryX; // Keep track of the entry point
+    private int entryY;
+    private int ladderX; // Keep track of the exit point
+    private int ladderY;
+    private List<Point> occupiedPositions;
 
     /**
      * Creates a square game board.
@@ -23,11 +26,14 @@ public class GameEngine {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Cell cell = new Cell();
-                Text text = new Text(i + "," + j);
+                Text text = new Text(i + "," + j); //javaFX
                 cell.getChildren().add(text);
                 map[i][j] = cell;
             }
         }
+        //level 1 entry bottom left
+        entryX = 0;
+        entryY = size - 1;
 
         map[0][0].setStyle("-fx-background-color: #7baaa4");
         map[size-1][size-1].setStyle("-fx-background-color: #7baaa4");
@@ -52,6 +58,45 @@ public class GameEngine {
     }
 
     /**
+     * Isolate specific cell to place game objects
+     * @param row is the y coordinate top to bottom
+     * @param col is the x coordinate left to right
+     * @return the cell
+     */
+    public Cell getCell(int row, int col) {
+        return map[row][col];
+    }
+
+    /**
+     * Generate the player start point
+     */
+    public void placePlayer() {
+        player = new Player(entryX, entryY);
+        updateMap();
+    }
+
+    public void placeLadder() {
+        Random rand = new Random();
+        do {
+            ladderX = rand.nextInt(getSize());
+            ladderY = rand.nextInt(getSize());
+        } while (ladderX == entryX && ladderY == entryY);
+    }
+
+    /**
+     * Update the map
+     */
+    private void updateMap() {
+        for (int i = 0; i < getSize(); i++) {
+            for (int j = 0; j < getSize(); j++) {
+                map[i][j].setPlayer(null); //clear previous player
+            }
+        }
+        Cell playerCell = map[player.getX()][player.getY()];
+        playerCell.SetPlayer(player);
+    }
+
+    /**
      * Plays a text-based game
      */
     public static void main(String[] args) {
@@ -61,11 +106,17 @@ public class GameEngine {
         //print out a representation of the map to the console.
         for (int i = 0; i < engine.getSize(); i++) {
             for (int j = 0; j < engine.getSize(); j++) {
-                System.out.print(" _ "); //simplified representation.
+                if (engine.getCell(i, j).getPlayer() != null) {
+                    System.out.print(player.getSymbol());
+                } else {
+                    System.out.print(" _ "); //empty cell
+                }
             }
-            System.out.println(); //newline
+            System.out.println(); //start next row
         }
         System.out.print("Command:");
+        System.out.println("Player is at: " + engine.player.getX() + ", " + engine.player.getY());
+        System.out.println("Exit is at: " + engine.getLadderX() + ", " + engine.getLadderY());
 
 
     }
