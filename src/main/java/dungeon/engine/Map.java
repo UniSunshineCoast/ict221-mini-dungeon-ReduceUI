@@ -1,5 +1,4 @@
 package dungeon.engine;
-
 import java.util.Random;
 
 public class Map {
@@ -29,26 +28,32 @@ public class Map {
         return map[x][y];
     }
 
-    public void placePlayer(int x, int y) {
-        map[x][y].setPlayer(new Player(x, y));
+    public void placePlayer(Player player) {
+        int x = player.getX();
+        int y = player.getY();
+        if (getCell(x, y) != null) {
+            map[x][y].setPlayer(player);
+        } else {
+            System.out.println("Check placePlayer");
+        }
     }
 
-    public void placeLadder(int x, int y) {
-        Random rand = new Random();
-        do {
-            int ladderX = rand.nextInt(size);
-            int ladderY = rand.nextInt(size);
-        } while (!map[ladderX][ladderY].hasPlayer());
-    }
+//    public void placeLadder(int x, int y) {
+//        Random rand = new Random();
+//        do {
+//            int ladderX = rand.nextInt(size);
+//            int ladderY = rand.nextInt(size);
+//        } while (!map[ladderX][ladderY].hasPlayer());
+//    }
 
-    public void displayMap() {
+    public void displayMap(){
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Cell cell = map[x][y];
                 if (cell.hasPlayer()){
                     System.out.print(" P ");
-                } else if (cell.hasLadder()){
-                    System.out.print(" L ");
+//                } else if (cell.hasLadder()){
+//                    System.out.print(" L ");
                 } else {
                     System.out.print(" _ ");
                 }

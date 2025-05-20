@@ -23,7 +23,20 @@ public class Player {
     public void setY(int y) {
         this.y = y;
     }
+
     public String getSymbol() {
         return symbol;
+    }
+    public void move(int dx, int dy, Map map) {
+        int newX = x + dx;
+        int newY = y + dy;
+        if (map.getCell(newX, newY) != null) {
+            map.getCell(x, y).setPlayer(null);
+            x = newX;
+            y = newY;
+            map.getCell(x, y).setPlayer(this);
+        } else {
+            System.out.println("Check Player.move");
+        }
     }
 }

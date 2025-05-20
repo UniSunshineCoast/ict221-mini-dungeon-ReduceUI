@@ -1,123 +1,96 @@
 package dungeon.engine;
 
-import javafx.scene.text.Text;
 import java.util.Random;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class GameEngine {
 
+    private Map map;
     private Player player;
-    private Cell[][] map;
-    private int entryX; // Keep track of the entry point
-    private int entryY;
-    private int ladderX; // Keep track of the exit point
-    private int ladderY;
-    private List<Point> occupiedPositions;
+    private int level;
+    private boolean gameOver;
+    private int score;
+    private Scanner scanner;
 
-    /**
-     * Creates a square game board.
-     *
-     * @param size the width and height.
-     */
-    public GameEngine(int size) {
-        map = new Cell[size][size];
+    public GameEngine() {
+        this.scanner = new Scanner(System.in);
+        this.level = 1;
+        this.score = 0;
+        this.gameOver = false;
+        StartLevel();
+    }
 
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                Cell cell = new Cell();
-                Text text = new Text(i + "," + j); //javaFX
-                cell.getChildren().add(text);
-                map[i][j] = cell;
-            }
+    public void StartLevel() {
+        this.map = new Map(10);
+        System.out.printf("Starting level %d\n", level);
+        System.out.printf("The size of map is %d * %d\n", map.getSize(), map.getSize());
+
+        // place player
+        if (level == 1) {
+            player = new Player(0, 9);
+        } else {
+            player = new Player(5, 5); //change to match previous exit
         }
-        //level 1 entry bottom left
-        entryX = 0;
-        entryY = size - 1;
+        map.placePlayer(player);
 
-        map[0][0].setStyle("-fx-background-color: #7baaa4");
-        map[size-1][size-1].setStyle("-fx-background-color: #7baaa4");
+        // place ladder/exit
+        // place enemies
+        // place gold
+        // place health potions
+        // place traps
+
     }
 
-    /**
-     * The size of the current game.
-     *
-     * @return this is both the width and the height.
-     */
-    public int getSize() {
-        return map.length;
-    }
-
-    /**
-     * The map of the current game.
-     *
-     * @return the map, which is a 2d array.
-     */
-    public Cell[][] getMap() {
-        return map;
-    }
-
-    /**
-     * Isolate specific cell to place game objects
-     * @param row is the y coordinate top to bottom
-     * @param col is the x coordinate left to right
-     * @return the cell
-     */
-    public Cell getCell(int row, int col) {
-        return map[row][col];
-    }
-
-    /**
-     * Generate the player start point
-     */
-    public void placePlayer() {
-        player = new Player(entryX, entryY);
-        updateMap();
-    }
-
-    public void placeLadder() {
-        Random rand = new Random();
-        do {
-            ladderX = rand.nextInt(getSize());
-            ladderY = rand.nextInt(getSize());
-        } while (ladderX == entryX && ladderY == entryY);
-    }
-
-    /**
-     * Update the map
-     */
-    private void updateMap() {
-        for (int i = 0; i < getSize(); i++) {
-            for (int j = 0; j < getSize(); j++) {
-                map[i][j].setPlayer(null); //clear previous player
-            }
+    public void Play(){
+        while (!gameOver) {
+            map.displayMap();
+            getPlayerInput();
+            //gameOver = true;
         }
-        Cell playerCell = map[player.getX()][player.getY()];
-        playerCell.SetPlayer(player);
+        System.out.println("Game Over");
+        scanner.close();
     }
 
-    /**
-     * Plays a text-based game
-     */
+    public void getPlayerInput(){
+        System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
+        String input = scanner.nextLine();
+        if (input.equals("1") || input.equals("2") || input.equals("3") || input.equals("4")){
+            movePlayer(input);
+        } else {
+            System.out.println("Invalid move.");
+            getPlayerInput(); //loop forever? include exit/quit/score etc
+        }
+    }
+
+    public void movePlayer(String input) {
+        int dx = 0, dy = 0;
+        switch (input) {
+            case "1":
+                dx = -1;
+                break;
+            case "2":
+                dy = -1;
+                break;
+            case "3":
+                dy = 1;
+                break;
+            case "4":
+                dx = 1;
+                break;
+        }
+        player.move(dx,dy,map);
+    }
+
+
     public static void main(String[] args) {
-        GameEngine engine = new GameEngine(10);
-        System.out.printf("The size of map is %d * %d\n", engine.getSize(), engine.getSize());
-
-        //print out a representation of the map to the console.
-        for (int i = 0; i < engine.getSize(); i++) {
-            for (int j = 0; j < engine.getSize(); j++) {
-                if (engine.getCell(i, j).getPlayer() != null) {
-                    System.out.print(player.getSymbol());
-                } else {
-                    System.out.print(" _ "); //empty cell
-                }
-            }
-            System.out.println(); //start next row
-        }
-        System.out.print("Command:");
-        System.out.println("Player is at: " + engine.player.getX() + ", " + engine.player.getY());
-        System.out.println("Exit is at: " + engine.getLadderX() + ", " + engine.getLadderY());
-
-
+        GameEngine engine = new GameEngine();
+        engine.Play();
     }
 }
+
+
+// hang over javaFX
+//        map[0][0].setStyle("-fx-background-color: #7baaa4");
+//        map[size-1][size-1].setStyle("-fx-background-color: #7baaa4");
+//    }
