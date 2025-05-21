@@ -13,8 +13,15 @@ public class TestMap {
     @Test
     void testGetCell() {
         Map map = new Map(2);
-        assertEquals(null, map.getCell(-10,0));
+        assertNull(map.getCell(-10, 0));
         assertNotNull(map.getCell(0,1));
         assertNull(map.getCell(0,-1));
     }
+
+//    @Test
+//    void testPlaceLadder() {
+//        Map map = new Map(10);
+//        map.placeLadder();
+//        assertEquals(10, map.getSize());
+//    }
 }

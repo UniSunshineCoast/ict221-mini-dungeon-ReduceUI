@@ -38,13 +38,19 @@ public class Map {
         }
     }
 
-//    public void placeLadder(int x, int y) {
-//        Random rand = new Random();
-//        do {
-//            int ladderX = rand.nextInt(size);
-//            int ladderY = rand.nextInt(size);
-//        } while (!map[ladderX][ladderY].hasPlayer());
-//    }
+    public void placeLadder() {
+        Random rand = new Random();
+        int ladderX, ladderY;
+        do {
+            ladderX = rand.nextInt(size);
+            ladderY = rand.nextInt(size);
+        } while (map[ladderX][ladderY].hasPlayer());
+        getCell(ladderX, ladderY).setHasLadder(true);
+    }
+
+
+
+
 
     public void displayMap(){
         for (int y = 0; y < size; y++) {
@@ -52,8 +58,8 @@ public class Map {
                 Cell cell = map[x][y];
                 if (cell.hasPlayer()){
                     System.out.print(" P ");
-//                } else if (cell.hasLadder()){
-//                    System.out.print(" L ");
+                } else if (cell.hasLadder()){
+                    System.out.print(" L ");
                 } else {
                     System.out.print(" _ ");
                 }
