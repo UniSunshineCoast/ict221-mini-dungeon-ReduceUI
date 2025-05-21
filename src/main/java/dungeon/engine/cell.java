@@ -2,24 +2,28 @@ package dungeon.engine;
 
 import javafx.scene.layout.StackPane;
 
-public class Cell extends StackPane {
+public class cell extends StackPane {
 
-    private Player player;
+    private player player;
     private boolean hasLadder;
+    private boolean isWalkable;
 
-    public Cell(){
+    public cell(){
         this.player = null;
+        this.hasLadder = false;
+        this.isWalkable = true;
+
     }
 
     public boolean hasPlayer(){
         return player != null;
     }
 
-    public Player getPlayer(){
+    public player getPlayer(){
         return player;
     }
 
-    public void setPlayer(Player player){
+    public void setPlayer(player player){
         this.player = player;
     }
 
@@ -29,6 +33,14 @@ public class Cell extends StackPane {
 
     public void setHasLadder(boolean hasLadder){
         this.hasLadder = hasLadder;
+    }
+
+    public boolean isWalkable() {
+        return isWalkable;
+    }
+
+    public void setWalkable(boolean walkable) {
+        this.isWalkable = walkable;
     }
 
 

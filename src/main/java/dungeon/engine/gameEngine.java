@@ -1,41 +1,35 @@
 package dungeon.engine;
 
-import java.util.Random;
-import java.util.List;
 import java.util.Scanner;
 
-public class GameEngine {
+public class gameEngine {
 
-    private Map map;
-    private Player player;
+    private map map;
+    private player player;
     private int level;
     private boolean gameOver;
-    private int score;
+//    private int score;
     private Scanner scanner;
     private int previousExitX;
     private int previousExitY;
 
-    public GameEngine() {
+    public gameEngine() {
         this.scanner = new Scanner(System.in);
         this.level = 1;
-        this.score = 0;
+//        this.score = 0;
         this.gameOver = false;
-        this.previousExitX = 0;
-        this.previousExitY = 0;
-        StartLevel();
+        this.previousExitX = 0; //initialise as lv1 start position
+        this.previousExitY = 9;
+        startLevel();
     }
 
-    public void StartLevel() {
-        this.map = new Map(10);
+    public void startLevel() {
+        this.map = new map(10);
         System.out.printf("Starting level %d\n", level);
         System.out.printf("The size of map is %d * %d\n", map.getSize(), map.getSize());
 
         // place player
-        if (level == 1) {
-            player = new Player(0, 9);
-        } else {
-            player = new Player(previousExitX, previousExitY); //change to match previous exit
-        }
+        player = new player(previousExitX, previousExitY);
         map.placePlayer(player);
 
         // place ladder/exit
@@ -48,7 +42,7 @@ public class GameEngine {
 
     }
 
-    public void Play(){
+    public void play(){
         while (!gameOver) {
             map.displayMap();
             getPlayerInput();
@@ -95,15 +89,14 @@ public class GameEngine {
     }
 
     private void handleInteractions(){
-        Cell playerCell = map.getCell(player.getX(),player.getY());
+        cell playerCell = map.getCell(player.getX(),player.getY());
 
         //Check for ladder/exit
         if (playerCell.hasLadder()) {
             level++;
             previousExitX = player.getX();
             previousExitY = player.getY();
-
-            StartLevel();
+            startLevel();
         }
 
         //check for enemy (melee / ranged)
@@ -112,8 +105,8 @@ public class GameEngine {
     }
 
     public static void main(String[] args) {
-        GameEngine engine = new GameEngine();
-        engine.Play();
+        gameEngine engine = new gameEngine();
+        engine.play();
     }
 }
 

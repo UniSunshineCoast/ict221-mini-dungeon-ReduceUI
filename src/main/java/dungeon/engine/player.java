@@ -1,14 +1,12 @@
 package dungeon.engine;
 
-public class Player {
+public class player {
     private int x;
     private int y;
-    private String symbol;
 
-    public Player(int x, int y) {
+    public player(int x, int y) {
         this.x = x;
         this.y = y;
-        this.symbol = "P";
     }
 
     public int getX() {
@@ -24,19 +22,16 @@ public class Player {
         this.y = y;
     }
 
-    public String getSymbol() {
-        return symbol;
-    }
-    public void move(int dx, int dy, Map map) {
+    public void move(int dx, int dy, map map) {
         int newX = x + dx;
         int newY = y + dy;
-        if (map.getCell(newX, newY) != null) {
+        if (map.getCell(newX, newY) != null && map.getCell(newX, newY).isWalkable()) {
             map.getCell(x, y).setPlayer(null);
             x = newX;
             y = newY;
             map.getCell(x, y).setPlayer(this);
         } else {
-            System.out.println("Check Player.move");
+            System.out.println("You can't move this direction");
         }
     }
 }

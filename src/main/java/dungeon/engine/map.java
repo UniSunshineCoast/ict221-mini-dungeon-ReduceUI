@@ -1,26 +1,27 @@
 package dungeon.engine;
 import java.util.Random;
 
-public class Map {
+public class map {
 
-    private Cell[][] map;
+    private cell[][] map;
     private int size;
 
-    public Map(int size) {
+    public map(int size) {
         this.size = size;
-        this.map = new Cell[size][size];
+        this.map = new cell[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                map[i][j] = new Cell();
+                map[i][j] = new cell();
             }
         }
+        generateWalls();
     }
 
     public int getSize() {
         return size;
     }
 
-    public Cell getCell(int x, int y) {
+    public cell getCell(int x, int y) {
         if (x < 0 || x >= size || y < 0 || y >= size) {
             System.out.println("Out of bounds");
             return null;
@@ -28,7 +29,20 @@ public class Map {
         return map[x][y];
     }
 
-    public void placePlayer(Player player) {
+    private void generateWalls() {
+        Random random = new Random();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if ( i == 0 && j == 9){
+                    map[i][j].setWalkable(true); //remove potential player/wall overlap on lvl 1
+                } else if (random.nextDouble() < 0.1) {  //10%
+                    map[i][j].setWalkable(false);
+                }
+            }
+        }
+    }
+
+    public void placePlayer(player player) {
         int x = player.getX();
         int y = player.getY();
         if (getCell(x, y) != null) {
@@ -44,22 +58,22 @@ public class Map {
         do {
             ladderX = rand.nextInt(size);
             ladderY = rand.nextInt(size);
-        } while (map[ladderX][ladderY].hasPlayer());
+        } while (map[ladderX][ladderY].hasPlayer() || !map[ladderX][ladderY].isWalkable());
         getCell(ladderX, ladderY).setHasLadder(true);
     }
-
-
-
-
 
     public void displayMap(){
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                Cell cell = map[x][y];
+                cell cell = map[x][y];
                 if (cell.hasPlayer()){
                     System.out.print(" P ");
-                } else if (cell.hasLadder()){
+                } else if (cell.hasLadder()) {
                     System.out.print(" L ");
+                } else if (!cell.isWalkable()) {
+                    System.out.print(" # ");
+
+
                 } else {
                     System.out.print(" _ ");
                 }

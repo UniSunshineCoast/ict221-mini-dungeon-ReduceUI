@@ -1,17 +1,16 @@
 package dungeon.gui;
 
-import dungeon.engine.Cell;
-import dungeon.engine.GameEngine;
-import dungeon.engine.Map;
+import dungeon.engine.gameEngine;
+import dungeon.engine.map;
 import javafx.fxml.FXML;
 import javafx.scene.layout.GridPane;
 
 public class Controller {
     @FXML
     private GridPane gridPane;
-    private Map map;
+    private map map;
 
-    GameEngine engine;
+    gameEngine engine;
 
 //    @FXML
 //    public void initialize() {
