@@ -27,9 +27,11 @@ public class player {
         int newY = y + dy;
         if (map.getCell(newX, newY) != null && map.getCell(newX, newY).isWalkable()) {
             map.getCell(x, y).setPlayer(null);
+            //map.getCell(x, y).setOccupied(false);
             x = newX;
             y = newY;
             map.getCell(x, y).setPlayer(this);
+            map.getCell(x, y).setOccupied(true);
             return true;
         } else {
             System.out.println("You can't move this direction");

@@ -3,8 +3,8 @@ import java.util.Random;
 
 public class map {
 
-    private cell[][] map;
-    private int size;
+    private final cell[][] map;
+    private final int size;
 
     public map(int size) {
         this.size = size;
@@ -47,8 +47,9 @@ public class map {
         int y = player.getY();
         if (getCell(x, y) != null) {
             map[x][y].setPlayer(player);
+            getCell(x, y).setOccupied(true);
         } else {
-            System.out.println("Check placePlayer");
+            System.out.println("Check map.placePlayer");
         }
     }
 
@@ -73,7 +74,7 @@ public class map {
                 } else if (!cell.isWalkable()) {
                     System.out.print(" # ");
                 } else if (cell.hasItem()) {
-                    System.out.print(" " + cell.getItem().getSymbol() + " ");
+                    System.out.print(cell.getItem().getSymbol());
 
 
                 } else {

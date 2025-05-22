@@ -10,7 +10,7 @@ public class gameEngine {
     private int level;
     private boolean gameOver;
     private int score;
-    private Scanner scanner;
+    private final Scanner scanner;
     private int previousExitX;
     private int previousExitY;
     private int moves;
@@ -33,6 +33,7 @@ public class gameEngine {
 
 
         this.difficulty = 3;
+        setDifficulty();
         startLevel();
     }
 
@@ -57,25 +58,27 @@ public class gameEngine {
     }
 
     private void placeItems(){
-        Random rand = new Random();
         int numGold = 5;
-        int numHeal = 2;
         int numTrap = 5;
+        int numHeal = 2;
 
         //place gold
         for (int i = 0; i < numGold; i++) {
-            int x, y;
-            do {
-                x = rand.nextInt(map.getSize());
-                y = rand.nextInt(map.getSize());
-            } while (map.getCell(x, y).hasPlayer() && !map.getCell(x, y).isWalkable());
-            map.getCell(x, y).setItem(new Gold(x, y));
+            int[] coords = randomPlacement();
+            map.getCell(coords[0], coords[1]).setItem(new Gold(coords[0], coords[1]));
         }
 
         //place traps
+        for (int i = 0; i < numTrap; i++) {
+            int[] coords = randomPlacement();
+            map.getCell(coords[0], coords[1]).setItem(new Trap(coords[0], coords[1]));
+        }
 
         //place healing potion
-
+        for (int i = 0; i < numHeal; i++) {
+            int[] coords = randomPlacement();
+            map.getCell(coords[0], coords[1]).setItem(new Heal(coords[0], coords[1]));
+        }
 
     }
 
@@ -87,20 +90,44 @@ public class gameEngine {
         //do items first...
     }
 
+    private int[] randomPlacement() {
+        Random rand = new Random();
+        int x, y;
+        do {
+            x = rand.nextInt(map.getSize());
+            y = rand.nextInt(map.getSize());
+        } while (map.getCell(x, y).isOccupied() || !map.getCell(x, y).isWalkable());
+        map.getCell(x, y).setOccupied(true);
+        return new int[]{x, y};
+    }
+
 
 
     private void play(){
-        while (!gameOver && moves > 0 && level < 3) {
+        while (!gameOver && moves > 0 && level < 3 && health > 0) {
             System.out.println("MovesRemaining: " + moves + " HP: " + health + " Score: " + score);
             map.displayMap();
             getPlayerInput();
-            if (lastMove) {
-                moves --;
-            }
             handleInteractions();
 
         }
         handleGameOver();
+    }
+
+    private void setDifficulty() {
+        System.out.println("Select difficulty to play (0-10): ");
+        String input = scanner.nextLine();
+        try {
+            int chosenDifficulty = Integer.parseInt(input);
+            if (chosenDifficulty >= 0 && chosenDifficulty <= 10) {
+                difficulty = chosenDifficulty;
+            } else {
+                System.out.printf("Invalid input. Difficulty set to default (%d).\n", difficulty);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number (e.g. 5).");
+            setDifficulty();
+        }
     }
 
     private void handleGameOver(){
@@ -118,13 +145,11 @@ public class gameEngine {
         scanner.close();
     }
 
-
-
     private void getPlayerInput(){
         System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
         String input = scanner.nextLine().toLowerCase();
         if (input.equals("1") || input.equals("2") || input.equals("3") || input.equals("4")) {
-            lastMove = movePlayer(input);
+            movePlayer(input);
         } else if (input.equals("q")) {
             gameOver = true;
 
@@ -136,7 +161,7 @@ public class gameEngine {
         }
     }
 
-    private boolean movePlayer(String input) {
+    private void movePlayer(String input) {
         int dx = 0, dy = 0;
         switch (input) {
             case "1":
@@ -152,7 +177,11 @@ public class gameEngine {
                 dx = 1;
                 break;
         }
-        return player.move(dx,dy,map);
+        //return player.move(dx,dy,map);
+        lastMove = player.move(dx,dy,map);
+        if (lastMove) {
+            moves --;
+        }
     }
 
     private void handleInteractions(){
@@ -168,25 +197,30 @@ public class gameEngine {
             }
         }
 
-        //check for enemy (melee / ranged)
-
         //check for item (potion / trap / gold)
         if (playerCell.hasItem()) {
             Item item = playerCell.getItem();
             if (item instanceof Gold){
                 score += ((Gold) item).getValue();
                 System.out.println("Score: " + score);
-            }
-            // else if heal / trap
-
-
-            playerCell.setItem(null);
-
+                playerCell.setItem(null); //player departing cell will make isOccupied false
+            } else if (item instanceof Trap){
+                health -= ((Trap) item).getDamage();
+            } else if (item instanceof Heal){
+                health += ((Heal) item).getHealValue();
+                playerCell.setItem(null);
+            } else
+                System.out.println("Invalid item");
         }
+
+        //check for enemy (melee / ranged)
+
     }
 
     public static void main(String[] args) {
         gameEngine engine = new gameEngine();
+
+
         engine.play();
     }
 }
