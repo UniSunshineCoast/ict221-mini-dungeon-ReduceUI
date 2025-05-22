@@ -33,9 +33,9 @@ public class map {
         Random random = new Random();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if ( i == 0 && j == 9){
-                    map[i][j].setWalkable(true); //remove potential player/wall overlap on lvl 1
-                } else if (random.nextDouble() < 0.1) {  //10%
+                if ( i == 0 && j == 9){ //remove potential player/wall overlap on lvl 1
+                    map[i][j].setWalkable(true);
+                } else if (random.nextDouble() < 0.1) {  //10% chance of wall... 1% chance of blocked path
                     map[i][j].setWalkable(false);
                 }
             }

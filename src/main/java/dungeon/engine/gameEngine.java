@@ -40,20 +40,12 @@ public class gameEngine {
     private void startLevel() {
         this.map = new map(10);
         System.out.printf("Starting level %d\n", level);
-        //System.out.printf("The size of map is %d * %d\n", map.getSize(), map.getSize());
 
-        // place player
         player = new player(previousExitX, previousExitY);
         map.placePlayer(player);
-
-        // place ladder/exit
         map.placeLadder();
-
-        // place enemies ()?
-        //
-
-        // place items
         placeItems();
+        // place enemies ()?
     }
 
     private void placeItems(){
@@ -182,11 +174,13 @@ public class gameEngine {
             }
             default -> moveReport;
         };
-        //return player.move(dx,dy,map);
+
         lastMove = player.move(dx,dy,map);
         if (lastMove) {
             moves --;
             System.out.println("You moved " + moveReport + " one step.");
+        } else {
+            System.out.println("You tried to move " + moveReport + " one step but it is a wall.");
         }
     }
 
@@ -210,15 +204,19 @@ public class gameEngine {
             switch (item) {
                 case Gold gold -> {
                     score += gold.getValue();
-                    System.out.println("Score: " + score);
+                    System.out.println("You picked up a gold.");
                     playerCell.setItem(null); //player departing cell will make isOccupied false
                 }
-                case Trap trap -> health -= trap.getDamage();
+                case Trap trap -> {
+                    health -= trap.getDamage();
+                    System.out.println("You fell into a trap.");
+                }
                 case Heal heal -> {
                     health += heal.getHealValue();
                     if (health > 0) {
                         health = 10;
                     }
+                    System.out.println("You drank a health potion.");
                     playerCell.setItem(null);
                 }
                 case null, default -> System.out.println("Invalid item");
@@ -226,13 +224,15 @@ public class gameEngine {
         }
 
         //check for enemy (melee / ranged)
+        System.out.println("You attacked a melee mutant and wins."); // "wins" as per design document.
+        System.out.println("A ranged mutant attacked, but missed.");
+        System.out.println("A ranged mutant attacked and you lost 2 HP.");
+        System.out.println("You attacked a ranged mutant and wins.");
 
     }
 
     public static void main(String[] args) {
         gameEngine engine = new gameEngine();
-
-
         engine.play();
     }
 }
