@@ -9,6 +9,7 @@ public class cell extends StackPane {
     private boolean isWalkable;
     private boolean isOccupied;
     private Item item;
+    private Enemy enemy;
 
     public cell(){
         this.player = null;
@@ -16,6 +17,7 @@ public class cell extends StackPane {
         this.isWalkable = true;
         this.isOccupied = false;
         this.item = null;
+        this.enemy = null;
 
     }
 
@@ -62,5 +64,14 @@ public class cell extends StackPane {
         this.item = item;
     }
 
-
+    //Tracks enemy - melee and range
+    public boolean hasEnemy(){
+        return enemy !=null;
+    }
+    public Enemy getEnemy() {
+        return enemy;
+    }
+    public void setEnemy(Enemy enemy){
+        this.enemy = enemy;
+    }
 }

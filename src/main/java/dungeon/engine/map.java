@@ -59,7 +59,7 @@ public class map {
         do {
             ladderX = rand.nextInt(size);
             ladderY = rand.nextInt(size);
-        } while (map[ladderX][ladderY].hasPlayer() || !map[ladderX][ladderY].isWalkable());
+        } while (map[ladderX][ladderY].isOccupied() || !map[ladderX][ladderY].isWalkable());
         getCell(ladderX, ladderY).setHasLadder(true);
     }
 
@@ -75,8 +75,8 @@ public class map {
                     System.out.print(" # ");
                 } else if (cell.hasItem()) {
                     System.out.print(cell.getItem().getSymbol());
-
-
+                } else if (cell.hasEnemy()) {
+                    System.out.print(cell.getEnemy().getSymbol());
                 } else {
                     System.out.print(" _ ");
                 }

@@ -30,7 +30,6 @@ public class player {
             x = newX;
             y = newY;
             map.getCell(x, y).setPlayer(this);
-            map.getCell(x, y).setOccupied(true);
             return true;
         } else {
             return false;

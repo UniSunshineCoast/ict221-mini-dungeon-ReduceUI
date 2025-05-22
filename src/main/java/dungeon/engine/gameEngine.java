@@ -1,5 +1,9 @@
 package dungeon.engine;
 
+import org.w3c.dom.ranges.Range;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -16,8 +20,8 @@ public class gameEngine {
     private int moves;
     private boolean lastMove;
     private int health;
-
-
+    private List<Enemy> meleeList;
+    private List<Enemy> rangedList;
     private int difficulty;
 
     private gameEngine() {
@@ -30,8 +34,6 @@ public class gameEngine {
         this.moves = 100;
         this.lastMove = false;
         this.health = 10;
-
-
         this.difficulty = 3;
         setDifficulty();
         startLevel();
@@ -45,7 +47,9 @@ public class gameEngine {
         map.placePlayer(player);
         map.placeLadder();
         placeItems();
-        // place enemies ()?
+        meleeList = new ArrayList<>();
+        rangedList = new ArrayList<>();
+        placeEnemies();
     }
 
     private void placeItems(){
@@ -70,16 +74,24 @@ public class gameEngine {
             int[] coords = randomPlacement();
             map.getCell(coords[0], coords[1]).setItem(new Heal(coords[0], coords[1]));
         }
-
     }
 
-//    private void placeEnemies(){
-//        Random rand = new Random();
-//        int numMelee = 3;
-//        int numRanged = difficulty;
-//
-//        //do items first...
-//    }
+    private void placeEnemies(){
+        int numMelee = 3;
+        int numRanged = difficulty;
+
+        for (int i = 0; i < numMelee; i++) {
+            int[] coords = randomPlacement();
+            meleeList.add(new Melee(coords[0], coords[1]));
+            map.getCell(coords[0], coords[1]).setEnemy(meleeList.get(i));
+        }
+
+        for (int i = 0; i < numRanged; i++) {
+            int[] coords = randomPlacement();
+            rangedList.add(new Ranged(coords[0], coords[1]));
+            map.getCell(coords[0], coords[1]).setEnemy(rangedList.get(i));
+        }
+    }
 
     private int[] randomPlacement() {
         Random rand = new Random();
@@ -97,6 +109,7 @@ public class gameEngine {
             System.out.println("MovesRemaining: " + moves + " HP: " + health + " Score: " + score);
             map.displayMap();
             getPlayerInput();
+            moveEnemies();
             handleInteractions();
 
         }
@@ -134,6 +147,8 @@ public class gameEngine {
 
         System.out.println("Final Score: " + score);
         scanner.close();
+
+        //high Score!
     }
 
     private void getPlayerInput(){
@@ -184,6 +199,12 @@ public class gameEngine {
         }
     }
 
+    private void moveEnemies(){
+        for (Enemy enemy : meleeList) {
+            enemy.move(map);
+        }
+    }
+
     private void handleInteractions(){
         cell playerCell = map.getCell(player.getX(),player.getY());
 
@@ -205,7 +226,8 @@ public class gameEngine {
                 case Gold gold -> {
                     score += gold.getValue();
                     System.out.println("You picked up a gold.");
-                    playerCell.setItem(null); //player departing cell will make isOccupied false
+                    playerCell.setItem(null);
+                    playerCell.setOccupied(false);
                 }
                 case Trap trap -> {
                     health -= trap.getDamage();
@@ -218,16 +240,32 @@ public class gameEngine {
                     }
                     System.out.println("You drank a health potion.");
                     playerCell.setItem(null);
+                    playerCell.setOccupied(false);
                 }
                 case null, default -> System.out.println("Invalid item");
             }
         }
 
         //check for enemy (melee / ranged)
-        System.out.println("You attacked a melee mutant and wins."); // "wins" as per design document.
-        System.out.println("A ranged mutant attacked, but missed.");
-        System.out.println("A ranged mutant attacked and you lost 2 HP.");
-        System.out.println("You attacked a ranged mutant and wins.");
+        if (playerCell.hasEnemy()) {
+            Enemy enemy = playerCell.getEnemy();
+            score += enemy.getValue();
+
+            if (enemy instanceof Melee) {
+                health -= enemy.getAttackDamage();
+                meleeList.remove(enemy);
+                System.out.println("You attacked a melee mutant and wins."); // "wins" as per design document.
+            } else if (enemy instanceof Range) {
+                rangedList.remove(enemy);
+                System.out.println("You attacked a ranged mutant and wins.");
+            }
+            playerCell.setEnemy(null);
+            playerCell.setOccupied(false);
+        }
+//
+//        System.out.println("A ranged mutant attacked, but missed.");
+//        System.out.println("A ranged mutant attacked, and you lost 2 HP.");
+//
 
     }
 
