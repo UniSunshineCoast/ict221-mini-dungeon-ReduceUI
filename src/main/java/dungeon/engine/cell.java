@@ -47,7 +47,7 @@ public class cell extends StackPane {
 
     //Tracks items enemies and player
     public boolean isOccupied() {
-        return isOccupied;
+        return hasPlayer() || hasLadder() || hasItem() || hasEnemy();
     }
     public void setOccupied(boolean occupied) {
         this.isOccupied = occupied;

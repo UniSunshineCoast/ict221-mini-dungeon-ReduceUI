@@ -3,10 +3,12 @@ package dungeon.engine;
 public class player {
     private int x;
     private int y;
+    private int health;
 
     public player(int x, int y) {
         this.x = x;
         this.y = y;
+        this.health = 10;
     }
 
     public int getX() {
@@ -20,6 +22,16 @@ public class player {
     }
     public void setY(int y) {
         this.y = y;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+    public void takeDamage(int damage) {
+        health -= damage;
+        if (health > 10) {
+            health = 10;
+        }
     }
 
     public Boolean move(int dx, int dy, map map) {

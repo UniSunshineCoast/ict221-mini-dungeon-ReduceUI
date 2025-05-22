@@ -9,7 +9,7 @@ public class Melee extends Enemy{
     }
 
     @Override
-    public void move(map map) {
+    public void move(map map, player player) {
         Random rand = new Random();
         int dx = 0, dy = 0;
         int moveAttempts = 0;

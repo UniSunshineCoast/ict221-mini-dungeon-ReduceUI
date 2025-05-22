@@ -28,5 +28,5 @@ public abstract class Enemy {
         return value;
     }
 
-    public abstract void move(map map);
+    public abstract void move(map map, player player);
 }

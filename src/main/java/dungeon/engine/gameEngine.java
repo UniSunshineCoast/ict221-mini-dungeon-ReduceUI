@@ -1,7 +1,5 @@
 package dungeon.engine;
 
-import org.w3c.dom.ranges.Range;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,7 +8,7 @@ import java.util.Scanner;
 public class gameEngine {
 
     private map map;
-    private player player;
+    private final player player;
     private int level;
     private boolean gameOver;
     private int score;
@@ -19,7 +17,6 @@ public class gameEngine {
     private int previousExitY;
     private int moves;
     private boolean lastMove;
-    private int health;
     private List<Enemy> meleeList;
     private List<Enemy> rangedList;
     private int difficulty;
@@ -33,8 +30,8 @@ public class gameEngine {
         this.previousExitY = 9;
         this.moves = 100;
         this.lastMove = false;
-        this.health = 10;
         this.difficulty = 3;
+        player = new player(previousExitX, previousExitY);
         setDifficulty();
         startLevel();
     }
@@ -43,7 +40,7 @@ public class gameEngine {
         this.map = new map(10);
         System.out.printf("Starting level %d\n", level);
 
-        player = new player(previousExitX, previousExitY);
+
         map.placePlayer(player);
         map.placeLadder();
         placeItems();
@@ -105,13 +102,12 @@ public class gameEngine {
     }
 
     private void play(){
-        while (!gameOver && moves > 0 && level < 3 && health > 0) {
-            System.out.println("MovesRemaining: " + moves + " HP: " + health + " Score: " + score);
+        while (!gameOver && moves > 0 && level < 3 && player.getHealth() > 0) {
+            System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
             map.displayMap();
             getPlayerInput();
-            moveEnemies();
             handleInteractions();
-
+            moveEnemies();
         }
         handleGameOver();
     }
@@ -136,7 +132,7 @@ public class gameEngine {
         if (moves == 0){
             System.out.println("Game Over - No more moves left");
             score = -1;
-        } else if (health <= 0) {
+        } else if (player.getHealth() <= 0) {
             System.out.println("Game Over - You ran out of health");
             score = -1;
         } else if (level == 3) {
@@ -201,7 +197,10 @@ public class gameEngine {
 
     private void moveEnemies(){
         for (Enemy enemy : meleeList) {
-            enemy.move(map);
+            enemy.move(map, player);
+        }
+        for (Enemy enemy : rangedList) {
+            enemy.move(map, player);
         }
     }
 
@@ -227,20 +226,15 @@ public class gameEngine {
                     score += gold.getValue();
                     System.out.println("You picked up a gold.");
                     playerCell.setItem(null);
-                    playerCell.setOccupied(false);
                 }
                 case Trap trap -> {
-                    health -= trap.getDamage();
+                    player.takeDamage(trap.getDamage());
                     System.out.println("You fell into a trap.");
                 }
                 case Heal heal -> {
-                    health += heal.getHealValue();
-                    if (health > 0) {
-                        health = 10;
-                    }
+                    player.takeDamage(heal.getHealValue() * -1);
                     System.out.println("You drank a health potion.");
                     playerCell.setItem(null);
-                    playerCell.setOccupied(false);
                 }
                 case null, default -> System.out.println("Invalid item");
             }
@@ -252,21 +246,15 @@ public class gameEngine {
             score += enemy.getValue();
 
             if (enemy instanceof Melee) {
-                health -= enemy.getAttackDamage();
+                player.takeDamage(enemy.getAttackDamage());
                 meleeList.remove(enemy);
                 System.out.println("You attacked a melee mutant and wins."); // "wins" as per design document.
-            } else if (enemy instanceof Range) {
+            } else if (enemy instanceof Ranged) {
                 rangedList.remove(enemy);
                 System.out.println("You attacked a ranged mutant and wins.");
             }
             playerCell.setEnemy(null);
-            playerCell.setOccupied(false);
         }
-//
-//        System.out.println("A ranged mutant attacked, but missed.");
-//        System.out.println("A ranged mutant attacked, and you lost 2 HP.");
-//
-
     }
 
     public static void main(String[] args) {
