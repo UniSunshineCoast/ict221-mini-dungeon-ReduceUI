@@ -7,11 +7,13 @@ public class cell extends StackPane {
     private player player;
     private boolean hasLadder;
     private boolean isWalkable;
+    private Item item;
 
     public cell(){
         this.player = null;
         this.hasLadder = false;
         this.isWalkable = true;
+        this.item = null;
 
     }
 
@@ -41,6 +43,18 @@ public class cell extends StackPane {
 
     public void setWalkable(boolean walkable) {
         this.isWalkable = walkable;
+    }
+
+    public boolean hasItem(){
+        return item != null;
+    }
+
+    public Item getItem(){
+        return item;
+    }
+
+    public void setItem(Item item){
+        this.item = item;
     }
 
 

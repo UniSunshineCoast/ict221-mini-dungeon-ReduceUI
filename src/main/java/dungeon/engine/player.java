@@ -22,7 +22,7 @@ public class player {
         this.y = y;
     }
 
-    public void move(int dx, int dy, map map) {
+    public Boolean move(int dx, int dy, map map) {
         int newX = x + dx;
         int newY = y + dy;
         if (map.getCell(newX, newY) != null && map.getCell(newX, newY).isWalkable()) {
@@ -30,8 +30,10 @@ public class player {
             x = newX;
             y = newY;
             map.getCell(x, y).setPlayer(this);
+            return true;
         } else {
             System.out.println("You can't move this direction");
+            return false;
         }
     }
 }

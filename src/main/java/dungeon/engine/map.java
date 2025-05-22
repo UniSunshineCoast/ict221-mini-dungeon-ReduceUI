@@ -72,6 +72,8 @@ public class map {
                     System.out.print(" L ");
                 } else if (!cell.isWalkable()) {
                     System.out.print(" # ");
+                } else if (cell.hasItem()) {
+                    System.out.print(" " + cell.getItem().getSymbol() + " ");
 
 
                 } else {
