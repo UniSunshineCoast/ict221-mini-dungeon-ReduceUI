@@ -54,7 +54,6 @@ public class gameEngine {
 
         // place items
         placeItems();
-
     }
 
     private void placeItems(){
@@ -82,13 +81,13 @@ public class gameEngine {
 
     }
 
-    private void placeEnemies(){
-        Random rand = new Random();
-        int numMelee = 3;
-        int numRanged = difficulty;
-
-        //do items first...
-    }
+//    private void placeEnemies(){
+//        Random rand = new Random();
+//        int numMelee = 3;
+//        int numRanged = difficulty;
+//
+//        //do items first...
+//    }
 
     private int[] randomPlacement() {
         Random rand = new Random();
@@ -100,8 +99,6 @@ public class gameEngine {
         map.getCell(x, y).setOccupied(true);
         return new int[]{x, y};
     }
-
-
 
     private void play(){
         while (!gameOver && moves > 0 && level < 3 && health > 0) {
@@ -133,8 +130,10 @@ public class gameEngine {
     private void handleGameOver(){
         if (moves == 0){
             System.out.println("Game Over - No more moves left");
+            score = -1;
         } else if (health <= 0) {
             System.out.println("Game Over - You ran out of health");
+            score = -1;
         } else if (level == 3) {
             System.out.println("Congratulations - You have completed the Dungeon");
         } else {
@@ -162,25 +161,32 @@ public class gameEngine {
     }
 
     private void movePlayer(String input) {
+        String moveReport = "";
         int dx = 0, dy = 0;
-        switch (input) {
-            case "1":
+        moveReport = switch (input) {
+            case "1" -> {
                 dx = -1;
-                break;
-            case "2":
+                yield "left";
+            }
+            case "2" -> {
                 dy = -1;
-                break;
-            case "3":
+                yield "up";
+            }
+            case "3" -> {
                 dy = 1;
-                break;
-            case "4":
+                yield "down";
+            }
+            case "4" -> {
                 dx = 1;
-                break;
-        }
+                yield "right";
+            }
+            default -> moveReport;
+        };
         //return player.move(dx,dy,map);
         lastMove = player.move(dx,dy,map);
         if (lastMove) {
             moves --;
+            System.out.println("You moved " + moveReport + " one step.");
         }
     }
 
@@ -189,6 +195,7 @@ public class gameEngine {
 
         //Check for ladder/exit
         if (playerCell.hasLadder()) {
+            difficulty += 2;
             level++;
             if (level < 3) {
                 previousExitX = player.getX();
@@ -200,17 +207,22 @@ public class gameEngine {
         //check for item (potion / trap / gold)
         if (playerCell.hasItem()) {
             Item item = playerCell.getItem();
-            if (item instanceof Gold){
-                score += ((Gold) item).getValue();
-                System.out.println("Score: " + score);
-                playerCell.setItem(null); //player departing cell will make isOccupied false
-            } else if (item instanceof Trap){
-                health -= ((Trap) item).getDamage();
-            } else if (item instanceof Heal){
-                health += ((Heal) item).getHealValue();
-                playerCell.setItem(null);
-            } else
-                System.out.println("Invalid item");
+            switch (item) {
+                case Gold gold -> {
+                    score += gold.getValue();
+                    System.out.println("Score: " + score);
+                    playerCell.setItem(null); //player departing cell will make isOccupied false
+                }
+                case Trap trap -> health -= trap.getDamage();
+                case Heal heal -> {
+                    health += heal.getHealValue();
+                    if (health > 0) {
+                        health = 10;
+                    }
+                    playerCell.setItem(null);
+                }
+                case null, default -> System.out.println("Invalid item");
+            }
         }
 
         //check for enemy (melee / ranged)
@@ -227,6 +239,6 @@ public class gameEngine {
 
 
 // hang over javaFX
-//        map[0][0].setStyle("-fx-background-color: #7baaa4");
-//        map[size-1][size-1].setStyle("-fx-background-color: #7baaa4");
+//        map[0][0].setStyle("-fx-background-color: #7ba aa4");
+//        map[size-1][size-1].setStyle("-fx-background-color: #7ba aa4");
 //    }

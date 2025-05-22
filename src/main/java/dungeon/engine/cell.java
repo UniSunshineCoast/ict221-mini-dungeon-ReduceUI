@@ -23,9 +23,6 @@ public class cell extends StackPane {
     public boolean hasPlayer(){
         return player != null;
     }
-    public player getPlayer(){
-        return player;
-    }
     public void setPlayer(player player){
         this.player = player;
     }
