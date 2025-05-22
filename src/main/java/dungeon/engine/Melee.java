@@ -39,9 +39,11 @@ public class Melee extends Enemy{
 
             if (map.getCell(newX, newY) != null && map.getCell(newX, newY).isWalkable() && !map.getCell(newX, newY).isOccupied()) {
                 map.getCell(x, y).setEnemy(null);
+                map.getCell(x, y).setOccupied(false);
                 x = newX;
                 y = newY;
                 map.getCell(x, y).setEnemy(this);
+                map.getCell(x, y).setOccupied(true);
                 return;
             }
             moveAttempts++;
