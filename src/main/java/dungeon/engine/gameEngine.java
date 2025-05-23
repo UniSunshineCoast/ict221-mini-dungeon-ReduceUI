@@ -10,6 +10,7 @@ public class gameEngine {
     private map map;
     private final player player;
     private int level;
+    private final int maxLevel;
     private boolean gameOver;
     private int score;
     private final Scanner scanner;
@@ -20,10 +21,12 @@ public class gameEngine {
     private List<Enemy> meleeList;
     private List<Enemy> rangedList;
     private int difficulty;
+    private final ScoreManager scoreManager;
 
     private gameEngine() {
         this.scanner = new Scanner(System.in);
         this.level = 1;
+        this.maxLevel = 2;
         this.score = 0;
         this.gameOver = false;
         this.previousExitX = 0; //initialise as level 1 start position
@@ -31,6 +34,9 @@ public class gameEngine {
         this.moves = 100;
         this.lastMove = false;
         this.difficulty = 3;
+        this.scoreManager = new ScoreManager();
+        System.out.println("Welcome to Dungeon!");
+
         player = new player(previousExitX, previousExitY);
         setDifficulty();
         startLevel();
@@ -102,7 +108,7 @@ public class gameEngine {
     }
 
     private void play(){
-        while (!gameOver && moves > 0 && level < 3 && player.getHealth() > 0) {
+        while (!gameOver && moves > 0 && level <= maxLevel && player.getHealth() > 0) {
             System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
             map.displayMap();
             getPlayerInput();
@@ -135,16 +141,18 @@ public class gameEngine {
         } else if (player.getHealth() <= 0) {
             System.out.println("Game Over - You ran out of health");
             score = -1;
-        } else if (level == 3) {
+        } else if (level > maxLevel) {
             System.out.println("Congratulations - You have completed the Dungeon");
         } else {
             System.out.println("Game Over - Deciding to leave already?");
+            score = -1;
         }
 
         System.out.println("Final Score: " + score);
+        scoreManager.addScore(score);
+        scoreManager.displayHighScores();
+        scoreManager.saveHighScores();
         scanner.close();
-
-        //high Score!
     }
 
     private void getPlayerInput(){
