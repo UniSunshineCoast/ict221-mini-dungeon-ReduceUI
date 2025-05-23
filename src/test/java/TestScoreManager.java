@@ -2,10 +2,6 @@ import dungeon.engine.HighScoreEntry;
 import dungeon.engine.ScoreManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +48,7 @@ public class TestScoreManager {
     }
 
     @Test
-    void TestAddScore_Date() throws IOException {
+    void TestAddScore_Date() {
         ScoreManager scoreManager = new ScoreManager();
 
         scoreManager.addScore(5);
@@ -68,10 +64,5 @@ public class TestScoreManager {
 
         scoreManager.saveHighScores();
         //scoreManager.displayHighScores();
-    }
-
-    @Test
-    void TestLoadHighScores() {
-        ScoreManager scoreManager = new ScoreManager();
     }
 }

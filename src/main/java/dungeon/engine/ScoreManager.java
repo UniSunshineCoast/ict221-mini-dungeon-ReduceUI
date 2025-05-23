@@ -50,20 +50,19 @@ public class ScoreManager {
     }
 
     public void saveHighScores() {
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream("scores.dat"));) {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream("scores.dat"))) {
             out.writeInt(highScores.size());
             for (int i = 0; i < highScores.size(); i++) {
                 out.writeUTF(highScores.get(i).toString());
             }
         } catch (IOException e) {
             System.err.println("Error saving high scores: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
     public void loadHighScores() {
         highScores.clear();
-        try (DataInputStream in = new DataInputStream(new FileInputStream("scores.dat"));) {
+        try (DataInputStream in = new DataInputStream(new FileInputStream("scores.dat"))) {
             int numScores = in.readInt();
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -78,9 +77,6 @@ public class ScoreManager {
                     String dateString = entryString.substring(spaceReference+1).trim();
                     Date date = sdf.parse(dateString);
 
-//                    HighScoreEntry entry = new HighScoreEntry(score, date);
-//                    ScoreManager.highScores.add(entry);
-
                     highScores.add(new HighScoreEntry(score, date));
                 } catch (ParseException e) {
                     System.err.println("Error parsing score: " + e.getMessage());
@@ -88,21 +84,7 @@ public class ScoreManager {
             }
         } catch (IOException e) {
             System.err.println("Error loading high scores: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
-
-//    public static void main(String[] args) throws IOException {
-//        try (DataOutputStream out = new DataOutputStream(new FileOutputStream("scores.dat"));) {
-//            out.writeUTF("John");
-//            out.writeDouble(85.5);
-//            out.writeUTF("Jim");
-//            out.writeDouble(12.3);
-//        }
-//
-//        try (DataInputStream in = new DataInputStream(new FileInputStream("scores.dat"));) {
-//            System.out.println(in.readUTF() + " " + in.readDouble());
-//            System.out.println(in.readUTF() + " " + in.readDouble());
-//        }
-//    }
 }
