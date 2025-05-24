@@ -15,18 +15,19 @@ import java.util.Date;
 public class ScoreManager {
 
     private static final int MAX_SCORES = 5;
+    private static final String Filename = "scores.dat";
     public static List<HighScoreEntry> highScores;
 
     public ScoreManager() {
         highScores = new ArrayList<>();
         loadHighScores();
-        displayHighScores();
+        //displayHighScores();
 
     }
 
     public void addScore(int score) {
         HighScoreEntry newEntry = new HighScoreEntry(score, new Date());
-        highScores.add(newEntry);
+        highScores.add(newEntry); //add congrats message for top 5
         Collections.sort(highScores);
         if (highScores.size() > MAX_SCORES) {
             highScores.removeLast();
@@ -50,7 +51,7 @@ public class ScoreManager {
     }
 
     public void saveHighScores() {
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream("scores.dat"))) {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(Filename))) {
             out.writeInt(highScores.size());
             for (int i = 0; i < highScores.size(); i++) {
                 out.writeUTF(highScores.get(i).toString());
@@ -62,7 +63,7 @@ public class ScoreManager {
 
     public void loadHighScores() {
         highScores.clear();
-        try (DataInputStream in = new DataInputStream(new FileInputStream("scores.dat"))) {
+        try (DataInputStream in = new DataInputStream(new FileInputStream(Filename))) {
             int numScores = in.readInt();
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 

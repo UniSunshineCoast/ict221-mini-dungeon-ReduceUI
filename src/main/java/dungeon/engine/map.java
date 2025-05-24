@@ -5,9 +5,11 @@ public class map {
 
     private final cell[][] map;
     private final int size;
+    private final gameEngine gameEngine;
 
-    public map(int size) {
+    public map(int size, gameEngine gameEngine) {
         this.size = size;
+        this.gameEngine = gameEngine;
         this.map = new cell[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -16,6 +18,7 @@ public class map {
         }
         generateWalls();
     }
+
 
     public int getSize() {
         return size;
