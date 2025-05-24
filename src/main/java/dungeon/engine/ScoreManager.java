@@ -27,10 +27,18 @@ public class ScoreManager {
 
     public void addScore(int score) {
         HighScoreEntry newEntry = new HighScoreEntry(score, new Date());
-        highScores.add(newEntry); //add congrats message for top 5
+        highScores.add(newEntry);
         Collections.sort(highScores);
+
+
+
         if (highScores.size() > MAX_SCORES) {
             highScores.removeLast();
+        }
+
+        boolean newHighScore = highScores.contains(newEntry);
+        if (newHighScore){
+            System.out.println("Congratulations on the new high score!");
         }
     }
 

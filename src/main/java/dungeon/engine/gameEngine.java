@@ -125,25 +125,6 @@ public class gameEngine {
     }
 
     private void play(){
-        System.out.println("gameOver = " + gameOver);
-        System.out.println("moves = " + moves);
-        System.out.println("level = " + level);
-        System.out.println("MaxLevel = " + maxLevel);
-        System.out.println("health = " + player.getHealth());
-        System.out.println("player loc = " + player.getX() + " " + player.getY());
-
-        System.out.println("previous x =" + previousExitX);
-        System.out.println("previous y =" + previousExitY);
-        for (int y = 0; y < map.getSize(); y++) {
-            for (int x = 0; x < map.getSize(); x++) {
-                cell cell = map.getCell(x, y);
-                if (cell.hasLadder()) {
-                    System.out.println("ladder loc = " + x + y);
-                }
-            }
-        }
-
-
         while (!gameOver && moves > 0 && level <= maxLevel && player.getHealth() > 0) {
             System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
             map.displayMap();
@@ -151,8 +132,6 @@ public class gameEngine {
             handleInteractions();
             moveEnemies();
         }
-
-
         handleGameOver();
     }
 
@@ -325,7 +304,6 @@ public class gameEngine {
 
     public static void main(String[] args) {
         gameEngine engine = new gameEngine();
-        System.out.println("check before play");
         engine.play();
     }
 }
