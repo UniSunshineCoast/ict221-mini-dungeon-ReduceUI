@@ -25,12 +25,15 @@ public class gameEngine {
     private boolean difficultySet = false;
     private final ScoreManager scoreManager;
     private final SaverLoader saverLoader;
+    private boolean gameLoaded;
 
     public gameEngine(boolean loadChoice, int difficulty) {
 
         this.scoreManager = new ScoreManager();
         this.saverLoader = new SaverLoader();
         this.difficulty = difficulty;
+        this.gameLoaded = false;
+        this.gameOver = false;
 
         if (loadChoice) {
             if (!loadGame()) {
@@ -134,13 +137,13 @@ public class gameEngine {
         if (!gameOver) moveEnemies();
     }
 
-    public void processPlayerMove(int dx, int dy, String direction) {
+    public boolean processPlayerMove(int dx, int dy, String direction) {
         boolean success = player.move(dx, dy, map);
         if (success) {
             moves --;
-            System.out.println("You moved " + direction + " one step.");
+            return true;
         } else {
-            System.out.println("You tried to move " + direction + " one step but it is a wall.");
+            return false;
         }
     }
 
@@ -319,6 +322,7 @@ public class gameEngine {
             this.meleeList = loadedState.getMeleeList();
             this.rangedList = loadedState.getRangedList();
             this.difficulty = loadedState.getDifficulty();
+            this.gameLoaded = true;
             System.out.printf("Continuing level %d - Difficulty %d\n", level, difficulty);
             return true;
         }
@@ -374,6 +378,10 @@ public class gameEngine {
 
     public void setDifficultySet(boolean difficultySet) {
         this.difficultySet = difficultySet;
+    }
+
+    public boolean isGameLoaded() {
+        return gameLoaded;
     }
 
 //    public static void main(String[] args) {

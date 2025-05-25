@@ -14,7 +14,7 @@ public class RunGameText {
     }
 
     public void startGame(){
-        System.out.println("Welcome to Dungeon!");
+        System.out.println("Welcome to Mini Dungeon!");
         int difficulty = difficultyDefault;
         boolean loadChoice = promptForLoad();
         if (!loadChoice) difficulty = promptForDifficulty();
@@ -78,10 +78,10 @@ public class RunGameText {
         System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
         String input = scanner.nextLine().toLowerCase();
         switch (input) {
-            case "1" -> engine.processPlayerMove(-1,0,"Left");
-            case "2" -> engine.processPlayerMove(0, -1, "up");
-            case "3" -> engine.processPlayerMove(0,1, "down");
-            case "4" -> engine.processPlayerMove(1, 0, "right");
+            case "1" -> movePlayer(-1,0,"Left");
+            case "2" -> movePlayer(0, -1, "up");
+            case "3" -> movePlayer(0,1, "down");
+            case "4" -> movePlayer(1, 0, "right");
             case "q" -> engine.setGameOver(true);
             case "s" -> engine.saveGame();
             case "l" -> engine.loadGame();
@@ -90,6 +90,15 @@ public class RunGameText {
                 System.out.println("Invalid move.");
                 getPlayerInput();
             }
+        }
+    }
+
+    private void movePlayer(int dx, int dy, String direction) {
+        boolean playerMoved = engine.processPlayerMove(dx, dy, direction);
+        if (playerMoved) {
+            System.out.println("You moved " + direction + " one step.");
+        } else {
+            System.out.println("You tried to move " + direction + " one step but it is a wall.");
         }
     }
 
