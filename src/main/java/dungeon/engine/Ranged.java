@@ -16,7 +16,7 @@ public class Ranged extends Enemy {
         int dx = Math.abs(player.getX() - this.x);
         int dy = Math.abs(player.getY() - this.y);
 
-        if ((dx == 0 && dy <= 2) || (dx == 2 && dy <= 0)) {
+        if ((dx == 0 && dy <= 2) || (dx <= 2 && dy == 0)) {
             hitChance = rand.nextInt(2);
             if (hitChance == 0) {
                 player.takeDamage(getAttackDamage());

@@ -14,35 +14,34 @@ public class gameEngine {
     private int maxLevel = 2;
     private boolean gameOver;
     private int score;
-    private final Scanner scanner;
+
     private int previousExitX;
     private int previousExitY;
     private int moves;
     private boolean lastMove;
     private List<Enemy> meleeList;
     private List<Enemy> rangedList;
-    private int difficulty;
+    private int difficulty = 4;
+    private boolean difficultySet = false;
     private final ScoreManager scoreManager;
     private final SaverLoader saverLoader;
 
-    private gameEngine() {
-        this.scanner = new Scanner(System.in);
+    public gameEngine(boolean loadChoice, int difficulty) {
 
         this.scoreManager = new ScoreManager();
         this.saverLoader = new SaverLoader();
-        System.out.println("Welcome to Dungeon!");
-        System.out.println("Would you like to (L)oad the saved game or (S)tart a new game?");
-        String choice = scanner.nextLine().toLowerCase();
+        this.difficulty = difficulty;
 
-        if (choice.equals("l")) {
+        if (loadChoice) {
             if (!loadGame()) {
-                System.out.println("Sorry, but the game wasn't loaded correctly.");
+                System.out.println("Failed to load, starting new game.");
                 initialiseNewGame();
             }
         } else {
             initialiseNewGame();
         }
     }
+
     private void initialiseNewGame(){
         this.level = 1;
         this.maxLevel = 2;
@@ -52,14 +51,12 @@ public class gameEngine {
         this.previousExitY = 9;
         this.moves = 100;
         this.lastMove = false;
-        this.difficulty = 3;
-        setDifficulty();
         startLevel();
     }
 
     private void startLevel() {
         this.map = new map(10, this);
-        System.out.printf("Starting level %d\n", level);
+        System.out.printf("Starting level %d - Difficulty %d\n", level, difficulty);
 
         player = new player(previousExitX, previousExitY);
         map.placePlayer(player);
@@ -68,8 +65,6 @@ public class gameEngine {
         meleeList = new ArrayList<>();
         rangedList = new ArrayList<>();
         placeEnemies();
-
-        //saverLoader.saveGame(map, player, level,score,moves,meleeList,rangedList,difficulty);
     }
 
     private void placeItems(){
@@ -124,34 +119,60 @@ public class gameEngine {
         return new int[]{x, y};
     }
 
+    public void processGameTurn() {
+        if (gameOver) return;
+
+        handleInteractions();
+
+
+        if (moves == 0) setGameOver(true);
+        if (level > maxLevel) setGameOver(true);
+        if (player.getHealth() <= 0) setGameOver(true);
+
+        if (gameOver) handleGameOver();
+
+        if (!gameOver) moveEnemies();
+    }
+
+    public void processPlayerMove(int dx, int dy, String direction) {
+        boolean success = player.move(dx, dy, map);
+        if (success) {
+            moves --;
+            System.out.println("You moved " + direction + " one step.");
+        } else {
+            System.out.println("You tried to move " + direction + " one step but it is a wall.");
+        }
+    }
+
+
     private void play(){
         while (!gameOver && moves > 0 && level <= maxLevel && player.getHealth() > 0) {
-            System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
-            map.displayMap();
-            getPlayerInput();
-            handleInteractions();
-            moveEnemies();
+//            System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
+//            map.displayMap();
+//            getPlayerInput();
+//            handleInteractions();
+//            moveEnemies();
         }
         handleGameOver();
     }
 
-    private void setDifficulty() {
-        System.out.println("Select difficulty to play (0-10): ");
-        String input = scanner.nextLine();
-        try {
-            int chosenDifficulty = Integer.parseInt(input);
-            if (chosenDifficulty >= 0 && chosenDifficulty <= 10) {
-                difficulty = chosenDifficulty;
-            } else {
-                System.out.printf("Invalid input. Difficulty set to default (%d).\n", difficulty);
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a valid number (e.g. 5).");
-            setDifficulty();
-        }
-    }
+//    private void setDifficulty() {
+//        System.out.println("Select difficulty to play (0-10): ");
+//        String input = scanner.nextLine();
+//        try {
+//            int chosenDifficulty = Integer.parseInt(input);
+//            if (chosenDifficulty >= 0 && chosenDifficulty <= 10) {
+//                difficulty = chosenDifficulty;
+//            } else {
+//                System.out.printf("Invalid input. Difficulty set to default (%d).\n", difficulty);
+//            }
+//        } catch (NumberFormatException e) {
+//            System.out.println("Invalid input. Please enter a valid number (e.g. 5).");
+//            setDifficulty();
+//        }
+//    }
 
-    private void handleGameOver(){
+    public void handleGameOver(){
         if (moves == 0){
             System.out.println("Game Over - No more moves left");
             score = -1;
@@ -168,25 +189,26 @@ public class gameEngine {
         System.out.println("Final Score: " + score);
         scoreManager.addScore(score);
         scoreManager.displayHighScores();
+
         scoreManager.saveHighScores();
-        scanner.close();
+
     }
 
-    private void getPlayerInput(){
-        System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
-        String input = scanner.nextLine().toLowerCase();
-        switch (input) {
-            case "1", "2", "3", "4" -> movePlayer(input);
-            case "q" -> gameOver = true;
-            case "s" -> saveGame();
-            case "l" -> loadGame();
-            // more inputs
-            default -> {
-                System.out.println("Invalid move.");
-                getPlayerInput();
-            }
-        }
-    }
+//    private void getPlayerInput(){
+//        System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
+//        String input = scanner.nextLine().toLowerCase();
+//        switch (input) {
+//            case "1", "2", "3", "4" -> movePlayer(input);
+//            case "q" -> gameOver = true;
+//            case "s" -> saveGame();
+//            case "l" -> loadGame();
+//            // more inputs
+//            default -> {
+//                System.out.println("Invalid move.");
+//                getPlayerInput();
+//            }
+//        }
+//    }
 
     private void movePlayer(String input) {
         String moveReport = "";
@@ -285,27 +307,79 @@ public class gameEngine {
     public void saveGame(){
         saverLoader.saveGame(map, player, level, score, moves, meleeList, rangedList, difficulty);
     }
+
     public boolean loadGame(){
         GameState loadedState = saverLoader.loadGame(this);
         if (loadedState != null) {
             this.map = loadedState.getMap();
             this.player = loadedState.getPlayer();
             this.level = loadedState.getLevel();
-            System.out.println("level: " + level);
             this.score = loadedState.getScore();
             this.moves = loadedState.getMoves();
             this.meleeList = loadedState.getMeleeList();
             this.rangedList = loadedState.getRangedList();
             this.difficulty = loadedState.getDifficulty();
+            System.out.printf("Continuing level %d - Difficulty %d\n", level, difficulty);
             return true;
         }
         return false;
     }
 
-    public static void main(String[] args) {
-        gameEngine engine = new gameEngine();
-        engine.play();
+    public int getDifficulty() {
+        return difficulty;
     }
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    public int getMoves() {
+        return moves;
+    }
+    public int getHealth() {
+        return player.getHealth();
+
+    }
+
+    public int getScore() {
+        return score;
+    }
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public map getMap() {
+        return map;
+    }
+
+    public void setGameOver(boolean bool) {
+        this.gameOver = bool;
+    }
+    public boolean getGameOver() {
+        return gameOver;
+    }
+
+    public ScoreManager getScoreManager() {
+        return scoreManager;
+    }
+
+    public boolean isDifficultySet() {
+        return difficultySet;
+    }
+
+    public void setDifficultySet(boolean difficultySet) {
+        this.difficultySet = difficultySet;
+    }
+
+//    public static void main(String[] args) {
+//        gameEngine engine = new gameEngine();
+//        engine.play();
+//    }
 }
 
 
