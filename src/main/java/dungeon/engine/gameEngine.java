@@ -3,7 +3,6 @@ package dungeon.engine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 import dungeon.engine.SaverLoader.GameState;
 
 public class gameEngine {
@@ -14,7 +13,7 @@ public class gameEngine {
     private int maxLevel = 2;
     private boolean gameOver;
     private int score;
-
+    private int health;
     private int previousExitX;
     private int previousExitY;
     private int moves;
@@ -26,6 +25,8 @@ public class gameEngine {
     private final ScoreManager scoreManager;
     private final SaverLoader saverLoader;
     private boolean gameLoaded;
+    private boolean isClimbingLadder;
+    private String myString;
 
     public gameEngine(boolean loadChoice, int difficulty) {
 
@@ -34,10 +35,13 @@ public class gameEngine {
         this.difficulty = difficulty;
         this.gameLoaded = false;
         this.gameOver = false;
+        this.isClimbingLadder = false;
+        this.myString = "3";
 
         if (loadChoice) {
             if (!loadGame()) {
                 System.out.println("Failed to load, starting new game.");
+
                 initialiseNewGame();
             }
         } else {
@@ -45,10 +49,11 @@ public class gameEngine {
         }
     }
 
-    private void initialiseNewGame(){
+    private void initialiseNewGame() {
         this.level = 1;
         this.maxLevel = 2;
         this.score = 0;
+        this.health = 10;
         this.gameOver = false;
         this.previousExitX = 0; //initialise as level 1 start position
         this.previousExitY = 9;
@@ -59,9 +64,9 @@ public class gameEngine {
 
     private void startLevel() {
         this.map = new map(10, this);
-        System.out.printf("Starting level %d - Difficulty %d\n", level, difficulty);
-
-        player = new player(previousExitX, previousExitY);
+        myString = "\nStarting level " + level + " - Difficulty " + difficulty;
+//        System.out.println(myString);
+        player = new player(previousExitX, previousExitY, health);
         map.placePlayer(player);
         map.placeLadder();
         placeItems();
@@ -70,7 +75,7 @@ public class gameEngine {
         placeEnemies();
     }
 
-    private void placeItems(){
+    private void placeItems() {
         int numGold = 5;
         int numTrap = 5;
         int numHeal = 2;
@@ -94,7 +99,7 @@ public class gameEngine {
         }
     }
 
-    private void placeEnemies(){
+    private void placeEnemies() {
         int numMelee = 3;
         int numRanged = difficulty;
 
@@ -124,59 +129,26 @@ public class gameEngine {
 
     public void processGameTurn() {
         if (gameOver) return;
-
         handleInteractions();
-
-
         if (moves == 0) setGameOver(true);
         if (level > maxLevel) setGameOver(true);
         if (player.getHealth() <= 0) setGameOver(true);
-
         if (gameOver) handleGameOver();
-
         if (!gameOver) moveEnemies();
     }
 
-    public boolean processPlayerMove(int dx, int dy, String direction) {
+    public boolean processPlayerMove(int dx, int dy) {
         boolean success = player.move(dx, dy, map);
         if (success) {
-            moves --;
+            moves--;
             return true;
         } else {
             return false;
         }
     }
 
-
-    private void play(){
-        while (!gameOver && moves > 0 && level <= maxLevel && player.getHealth() > 0) {
-//            System.out.println("MovesRemaining: " + moves + " HP: " + player.getHealth() + " Score: " + score);
-//            map.displayMap();
-//            getPlayerInput();
-//            handleInteractions();
-//            moveEnemies();
-        }
-        handleGameOver();
-    }
-
-//    private void setDifficulty() {
-//        System.out.println("Select difficulty to play (0-10): ");
-//        String input = scanner.nextLine();
-//        try {
-//            int chosenDifficulty = Integer.parseInt(input);
-//            if (chosenDifficulty >= 0 && chosenDifficulty <= 10) {
-//                difficulty = chosenDifficulty;
-//            } else {
-//                System.out.printf("Invalid input. Difficulty set to default (%d).\n", difficulty);
-//            }
-//        } catch (NumberFormatException e) {
-//            System.out.println("Invalid input. Please enter a valid number (e.g. 5).");
-//            setDifficulty();
-//        }
-//    }
-
-    public void handleGameOver(){
-        if (moves == 0){
+    public void handleGameOver() {
+        if (moves == 0) {
             System.out.println("Game Over - No more moves left");
             score = -1;
         } else if (player.getHealth() <= 0) {
@@ -194,76 +166,32 @@ public class gameEngine {
         scoreManager.displayHighScores();
 
         scoreManager.saveHighScores();
-
     }
 
-//    private void getPlayerInput(){
-//        System.out.println("Enter your move (1=left, 2=up, 3=down, 4=right):");
-//        String input = scanner.nextLine().toLowerCase();
-//        switch (input) {
-//            case "1", "2", "3", "4" -> movePlayer(input);
-//            case "q" -> gameOver = true;
-//            case "s" -> saveGame();
-//            case "l" -> loadGame();
-//            // more inputs
-//            default -> {
-//                System.out.println("Invalid move.");
-//                getPlayerInput();
-//            }
-//        }
-//    }
-
-    private void movePlayer(String input) {
-        String moveReport = "";
-        int dx = 0, dy = 0;
-        moveReport = switch (input) {
-            case "1" -> {
-                dx = -1;
-                yield "left";
+    private void moveEnemies() {
+        if (!isClimbingLadder) {
+            for (Enemy enemy : meleeList) {
+                enemy.move(map, player);
             }
-            case "2" -> {
-                dy = -1;
-                yield "up";
+            for (Enemy enemy : rangedList) {
+                enemy.move(map, player);
             }
-            case "3" -> {
-                dy = 1;
-                yield "down";
-            }
-            case "4" -> {
-                dx = 1;
-                yield "right";
-            }
-            default -> moveReport;
-        };
-
-        lastMove = player.move(dx,dy,map);
-        if (lastMove) {
-            moves --;
-            System.out.println("You moved " + moveReport + " one step.");
-        } else {
-            System.out.println("You tried to move " + moveReport + " one step but it is a wall.");
         }
+        isClimbingLadder = false;
     }
 
-    private void moveEnemies(){
-        for (Enemy enemy : meleeList) {
-            enemy.move(map, player);
-        }
-        for (Enemy enemy : rangedList) {
-            enemy.move(map, player);
-        }
-    }
-
-    private void handleInteractions(){
-        cell playerCell = map.getCell(player.getX(),player.getY());
+    private void handleInteractions() {
+        cell playerCell = map.getCell(player.getX(), player.getY());
 
         //Check for ladder/exit
         if (playerCell.hasLadder()) {
             difficulty += 2;
             level++;
-            if (level < 3) {
+            if (level >= maxLevel) {
                 previousExitX = player.getX();
                 previousExitY = player.getY();
+                health = player.getHealth();
+                isClimbingLadder = true;
                 startLevel();
             }
         }
@@ -307,11 +235,11 @@ public class gameEngine {
         }
     }
 
-    public void saveGame(){
+    public void saveGame() {
         saverLoader.saveGame(map, player, level, score, moves, meleeList, rangedList, difficulty);
     }
 
-    public boolean loadGame(){
+    public boolean loadGame() {
         GameState loadedState = saverLoader.loadGame(this);
         if (loadedState != null) {
             this.map = loadedState.getMap();
@@ -332,6 +260,7 @@ public class gameEngine {
     public int getDifficulty() {
         return difficulty;
     }
+
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
     }
@@ -339,12 +268,15 @@ public class gameEngine {
     public int getLevel() {
         return level;
     }
+
     public void setLevel(int level) {
         this.level = level;
     }
+
     public int getMoves() {
         return moves;
     }
+
     public int getHealth() {
         return player.getHealth();
 
@@ -353,6 +285,7 @@ public class gameEngine {
     public int getScore() {
         return score;
     }
+
     public void setScore(int score) {
         this.score = score;
     }
@@ -364,6 +297,7 @@ public class gameEngine {
     public void setGameOver(boolean bool) {
         this.gameOver = bool;
     }
+
     public boolean getGameOver() {
         return gameOver;
     }
@@ -384,14 +318,14 @@ public class gameEngine {
         return gameLoaded;
     }
 
-//    public static void main(String[] args) {
-//        gameEngine engine = new gameEngine();
-//        engine.play();
-//    }
+    public int getPreviousExitX() {
+        return previousExitX;
+    }
+    public int getPreviousExitY() {
+        return previousExitY;
+    }
+
+    public String getMyString() {
+        return myString;
+    }
 }
-
-
-// hang over javaFX
-//        map[0][0].setStyle("-fx-background-color: #7ba aa4");
-//        map[size-1][size-1].setStyle("-fx-background-color: #7ba aa4");
-//    }

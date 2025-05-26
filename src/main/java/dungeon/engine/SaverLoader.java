@@ -70,8 +70,8 @@ public class SaverLoader {
             int playerX = in.readInt();
             int playerY = in.readInt();
             int health = in.readInt();
-            player loadedPlayer = new player(playerX, playerY);
-            loadedPlayer.setHealth(health);
+            player loadedPlayer = new player(playerX, playerY, health);
+//            loadedPlayer.setHealth(health);
 
             int loadedLevel = in.readInt();
             int loadedScore = in.readInt();

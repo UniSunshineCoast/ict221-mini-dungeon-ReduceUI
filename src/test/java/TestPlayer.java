@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestPlayer {
     @Test
     void testPlayer(){
-        player p = new player(1,1);
+        player p = new player(1,1, 8);
 
         assertEquals(1, p.getX());
         assertEquals(1, p.getY());

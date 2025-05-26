@@ -7,11 +7,15 @@ import dungeon.engine.Enemy;
 import dungeon.engine.Item;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class Controller {
     @FXML private Button upBn;
@@ -38,9 +42,7 @@ public class Controller {
         difficultySlider.setMax(10);
         difficultySlider.setValue(3);
         difficultySlider.setShowTickLabels(true);
-        difficultySlider.setShowTickMarks(true);
-        difficultySlider.setSnapToTicks(true);
-        difficultyLabel.setText(String.valueOf(difficultySlider.getValue()));
+        difficultyLabel.textProperty().bind(difficultySlider.valueProperty().asString("%.0f"));
 
         engine = new gameEngine(false, (int) difficultySlider.getValue());
 
@@ -63,7 +65,7 @@ public class Controller {
             return;
         }
 
-        boolean playerMoved = engine.processPlayerMove(dx, dy, direction);
+        boolean playerMoved = engine.processPlayerMove(dx, dy);
         if (playerMoved) {
             textArea.setText("You moved " + direction + " one step.");
         } else {
@@ -78,10 +80,10 @@ public class Controller {
     }
 
     private void startGame(){
-        engine = new gameEngine(true, (int) difficultySlider.getValue());
+        engine = new gameEngine(false, (int) difficultySlider.getValue());
         updateGui();
         textArea.setText("Welcome to Mini Dungeon!\n");
-        textArea.appendText("Starting level " + engine.getLevel() + " - Difficulty " + engine.getDifficulty() + ".\n");
+        textArea.appendText(engine.getMyString());
     }
 
     private void saveGame(){
@@ -92,12 +94,10 @@ public class Controller {
     private void loadGame(){
         engine = new gameEngine(true, 1);
         if (engine.isGameLoaded()){
-            textArea.appendText("Game loaded!\n");
+            textArea.setText("Game loaded!\n");
         } else {
-            textArea.appendText("Load failed, starting new game\n");
+            textArea.setText("Load failed, starting new game\n");
         }
-
-
         difficultySlider.setValue(engine.getDifficulty());
     }
 
@@ -108,14 +108,8 @@ public class Controller {
     private void updateGui() {
         gridPane.getChildren().clear();
         gridPane.setGridLinesVisible(true);
-
-
         map gameMap = engine.getMap();
         int mapSize = gameMap.getSize();
-
-
-
-
 
         //Loop through map board and add each cell into grid pane
         for(int y = 0; y < mapSize; y++) {
@@ -124,9 +118,9 @@ public class Controller {
 
                 cell.getChildren().clear();
 
-                Pane pane = new Pane();
-                pane.setPrefSize(CELL_SIZE, CELL_SIZE);
-                pane.setStyle("-fx-border-colour: #333333; -fx-border-width: 0.5");
+//                Pane pane = new Pane();
+//                pane.setPrefSize(CELL_SIZE, CELL_SIZE);
+//                pane.setStyle("-fx-border-colour: #333333; -fx-border-width: 0.5");
 
                 //walls
                 if (!cell.isWalkable()) {
@@ -135,19 +129,48 @@ public class Controller {
                     cell.setStyle("-fx-background-color: #AAAAAA");
                 }
 
-                //player
+                ImageView imageView = null;
+                String imagePath = null;
+                Enemy enemy = null;
+                Item item = null;
+
+                //dynamic objects
                 if (cell.hasPlayer()) {
-                    cell.getChildren().add(new Text ("P"));
+                    imagePath = "/p.png";
                 } else if (cell.hasLadder()) {
-                    cell.getChildren().add(new Text ("L"));
+                    imagePath = "/l.png";
                 } else if (cell.hasEnemy()) {
-                    Enemy enemy = cell.getEnemy();
-                    cell.getChildren().add(new Text (enemy.getSymbol()));
+                    enemy = cell.getEnemy();
+                    imagePath = "/" + enemy.getSymbol().toLowerCase().trim() + ".png";
                 } else if (cell.hasItem()) {
-                    Item item = cell.getItem();
-                    cell.getChildren().add(new Text (item.getSymbol()));
+                    item = cell.getItem();
+                    imagePath = "/" + item.getSymbol().toLowerCase().trim() + ".png";
                 }
 
+                if (imagePath != null) {
+                    try {
+                        InputStream inputStream = getClass().getResourceAsStream(imagePath);
+                        assert inputStream != null;
+                        Image image = new Image(inputStream);
+                        imageView = new ImageView(image);
+                        imageView.setFitWidth(CELL_SIZE);
+                        imageView.setFitHeight(CELL_SIZE);
+
+                        imageView.setPreserveRatio(true);
+                        cell.getChildren().add(imageView);
+                    } catch (Exception e){
+                        if (cell.hasPlayer()) cell.getChildren().add(new Text ("P"));
+                        if (cell.hasLadder()) cell.getChildren().add(new Text ("L"));
+                        if (cell.hasEnemy()) {
+                            assert enemy != null;
+                            cell.getChildren().add(new Text (enemy.getSymbol()));
+                        }
+                        if (cell.hasItem()) {
+                            assert item != null;
+                            cell.getChildren().add(new Text (item.getSymbol()));
+                        }
+                    }
+                }
                 gridPane.add(cell, x, y);
             }
         }

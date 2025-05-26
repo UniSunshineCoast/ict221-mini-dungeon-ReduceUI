@@ -19,7 +19,7 @@ public class RunGameText {
         boolean loadChoice = promptForLoad();
         if (!loadChoice) difficulty = promptForDifficulty();
         engine = new gameEngine(loadChoice, difficulty);
-
+        System.out.println(engine.getMyString());
 
         while(!engine.getGameOver()){
             displayGame();
@@ -94,11 +94,11 @@ public class RunGameText {
     }
 
     private void movePlayer(int dx, int dy, String direction) {
-        boolean playerMoved = engine.processPlayerMove(dx, dy, direction);
+        boolean playerMoved = engine.processPlayerMove(dx, dy);
         if (playerMoved) {
-            System.out.println("You moved " + direction + " one step.");
+            System.out.println("\nYou moved " + direction + " one step.");
         } else {
-            System.out.println("You tried to move " + direction + " one step but it is a wall.");
+            System.out.println("\nYou tried to move " + direction + " one step but it is a wall.");
         }
     }
 

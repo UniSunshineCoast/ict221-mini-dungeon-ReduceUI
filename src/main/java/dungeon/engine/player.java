@@ -5,10 +5,10 @@ public class player {
     private int y;
     private int health;
 
-    public player(int x, int y) {
+    public player(int x, int y, int instancedHealth) {
         this.x = x;
         this.y = y;
-        this.health = 10;
+        this.health = instancedHealth;
     }
 
     public int getX() {

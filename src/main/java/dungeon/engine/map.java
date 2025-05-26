@@ -5,18 +5,16 @@ public class map {
 
     private final cell[][] map;
     private final int size;
-    //private final gameEngine gameEngine;
 
-    public map(int size, gameEngine gameEngine) {
+    public map(int size, gameEngine engine) {
         this.size = size;
-        //this.gameEngine = gameEngine;
         this.map = new cell[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 map[i][j] = new cell();
             }
         }
-        generateWalls();
+        generateWalls(engine.getPreviousExitX(), engine.getPreviousExitY());
     }
 
 
@@ -26,17 +24,16 @@ public class map {
 
     public cell getCell(int x, int y) {
         if (x < 0 || x >= size || y < 0 || y >= size) {
-            //System.out.println("Out of bounds");
             return null;
         }
         return map[x][y];
     }
 
-    private void generateWalls() {
+    private void generateWalls(int playerX, int playerY) {
         Random random = new Random();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if ( i == 0 && j == 9){ //remove potential player/wall overlap on lvl 1
+                if ( i == playerX && j == playerY){ //remove potential player/wall overlap on start
                     map[i][j].setWalkable(true);
                 } else if (random.nextDouble() < 0.1) {  //10% chance of wall... 1% chance of blocked path
                     map[i][j].setWalkable(false);
@@ -65,10 +62,6 @@ public class map {
         } while (map[ladderX][ladderY].isOccupied() || !map[ladderX][ladderY].isWalkable());
         getCell(ladderX, ladderY).setHasLadder(true);
     }
-
-
-
-
 
     public void displayMap(){
         for (int y = 0; y < size; y++) {
