@@ -1,5 +1,7 @@
 package dungeon.engine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Ranged extends Enemy {
@@ -9,7 +11,8 @@ public class Ranged extends Enemy {
     }
 
     @Override
-    public void move(map map, player player) {
+    public List<String> move(map map, player player) {
+        List<String> messages = new ArrayList<>();
         // range doesn't move, but it can attack
         Random rand = new Random();
         int hitChance;
@@ -20,11 +23,14 @@ public class Ranged extends Enemy {
             hitChance = rand.nextInt(2);
             if (hitChance == 0) {
                 player.takeDamage(getAttackDamage());
-                System.out.println("A ranged mutant attacked, and you lost " + getAttackDamage() + " HP.");
+
+                //System.out.println("A ranged mutant attacked, and you lost " + getAttackDamage() + " HP.");
+                messages.add("A ranged mutant attacked, and you lost " + getAttackDamage() + " HP.");
             } else {
-                System.out.println("A ranged mutant attacked, but missed.");
+                //System.out.println("A ranged mutant attacked, but missed.");
+                messages.add("A ranged mutant attacked, but missed.");
             }
         }
 
-    }
+    return messages;}
 }

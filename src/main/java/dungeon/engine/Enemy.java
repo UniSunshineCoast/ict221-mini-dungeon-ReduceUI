@@ -1,5 +1,7 @@
 package dungeon.engine;
 
+import java.util.List;
+
 public abstract class Enemy {
 
     protected int x;
@@ -28,5 +30,12 @@ public abstract class Enemy {
         return value;
     }
 
-    public abstract void move(map map, player player);
+    public void setX(int x){
+        this.x = x;
+    }
+    public void setY(int y){
+        this.y = y;
+    }
+
+    public abstract List<String> move(map map, player player);
 }

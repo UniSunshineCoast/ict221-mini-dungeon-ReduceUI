@@ -1,21 +1,16 @@
 package dungeon.gui;
 
-import dungeon.engine.gameEngine;
-import dungeon.engine.map;
-import dungeon.engine.cell;
-import dungeon.engine.Enemy;
-import dungeon.engine.Item;
+import dungeon.engine.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
+import java.util.List;
+import java.util.Optional;
 
 public class Controller {
     @FXML private Button upBn;
@@ -24,13 +19,13 @@ public class Controller {
     @FXML public Button downBn;
     @FXML public TextArea textArea;
     @FXML public Button startBn;
+    @FXML public Button helpBn;
     @FXML public Button saveBn;
     @FXML public Button loadBn;
     @FXML public Button quitBn;
     @FXML public Label difficultyLabel;
     @FXML public Slider difficultySlider;
     @FXML private GridPane gridPane;
-    private map map;                                        //bin?
 
     private gameEngine engine;
     private static final double CELL_SIZE = 40;
@@ -44,7 +39,7 @@ public class Controller {
         difficultySlider.setShowTickLabels(true);
         difficultyLabel.textProperty().bind(difficultySlider.valueProperty().asString("%.0f"));
 
-        engine = new gameEngine(false, (int) difficultySlider.getValue());
+        engine = new gameEngine(false, (int) Math.round(difficultySlider.getValue()));
 
         //Buttons
         upBn.setOnAction(event -> movePlayer(0, -1, "up"));
@@ -52,38 +47,36 @@ public class Controller {
         rightBn.setOnAction(event -> movePlayer(1, 0, "right"));
         downBn.setOnAction(event -> movePlayer(0, 1, "down"));
         startBn.setOnAction(event -> startGame());
+        helpBn.setOnAction(actionEvent -> showHelp());
         saveBn.setOnAction(event -> saveGame());
         loadBn.setOnAction(event -> loadGame());
         quitBn.setOnAction(event -> quitGame());
 
+        textArea.setText("Welcome to Mini Dungeon!\n");
+        textArea.setEditable(false);
         updateGui();
     }
 
     private void movePlayer(int dx, int dy, String direction) {
-        if (engine.getGameOver()){
+        if (engine.isGameOver()){
             textArea.setText("Start a new game.");
             return;
         }
-
-        boolean playerMoved = engine.processPlayerMove(dx, dy);
-        if (playerMoved) {
-            textArea.setText("You moved " + direction + " one step.");
-        } else {
-            textArea.setText("You tried to move " + direction + " one step but it is a wall.");
-        }
+        textArea.setText("");
+        engine.processPlayerMove(dx, dy, direction);
         engine.processGameTurn();
-        updateGui();
 
-        if (engine.getGameOver()){
-            textArea.setText("Game over code 1.");
+        updateGui();
+        displayGameMessages();
+
+        if (engine.isGameOver()) {
+            engine.handleGameOver(); //game over msg
         }
     }
 
     private void startGame(){
-        engine = new gameEngine(false, (int) difficultySlider.getValue());
+        engine = new gameEngine(false, (int) Math.round(difficultySlider.getValue()));
         updateGui();
-        textArea.setText("Welcome to Mini Dungeon!\n");
-        textArea.appendText(engine.getMyString());
     }
 
     private void saveGame(){
@@ -99,10 +92,51 @@ public class Controller {
             textArea.setText("Load failed, starting new game\n");
         }
         difficultySlider.setValue(engine.getDifficulty());
+        updateGui();
+        displayGameMessages();
     }
 
     private void quitGame(){
-        textArea.setText("Deciding to leave already?");
+        textArea.setText("");
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Quit game?");
+        alert.setHeaderText("Are you sure you want to quit?");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK){
+            javafx.application.Platform.exit();
+            System.exit(0);
+        }
+        textArea.setText("Let's get some gold!\n");
+    }
+
+    private void showHelp(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Help");
+        alert.setHeaderText("Welcome to Mini Dungeon!");
+        String rules = "Enter an exciting dungeon-exploration game set in a \n" +
+                "mysterious maze! Navigate through two challenging dungeon \n" +
+                "levels, each represented as a 10 x 10 grid filled with \n" +
+                "treasures, mutants, traps, and potions.\n\n" +
+                "Your goal: achieve the highest possible score by collecting \n" +
+                "gold, defeating mutants, and safely escaping the dungeon \n" +
+                "through the ladder—all within a limited number of moves!";
+        alert.setContentText(rules);
+        alert.setResizable(true);
+        alert.showAndWait();
+    }
+
+    private void displayGameMessages(){
+        List<String> messages = engine.Messages();
+
+        for (String message : messages){
+            textArea.appendText(message + "\n");
+        }
+        if (!engine.isGameOver()) {
+        textArea.appendText("\nMoves left: " + engine.getMoves() + "\n");
+        textArea.appendText("Health remaining: " + engine.getHealth() + "\n");
+        textArea.appendText("Score: " + engine.getScore() + "\n");
+        }
+
     }
 
     private void updateGui() {
@@ -174,7 +208,6 @@ public class Controller {
                 gridPane.add(cell, x, y);
             }
         }
-
     }
 
 }

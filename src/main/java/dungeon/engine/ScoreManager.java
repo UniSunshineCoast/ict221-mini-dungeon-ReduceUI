@@ -21,16 +21,13 @@ public class ScoreManager {
     public ScoreManager() {
         highScores = new ArrayList<>();
         loadHighScores();
-        //displayHighScores();
-
     }
 
-    public void addScore(int score) {
+    public List<String> addScore(int score) {
+        List<String> messages = new ArrayList<>();
         HighScoreEntry newEntry = new HighScoreEntry(score, new Date());
         highScores.add(newEntry);
         Collections.sort(highScores);
-
-
 
         if (highScores.size() > MAX_SCORES) {
             highScores.removeLast();
@@ -38,24 +35,27 @@ public class ScoreManager {
 
         boolean newHighScore = highScores.contains(newEntry);
         if (newHighScore){
-            System.out.println("Congratulations on the new high score!");
+            messages.add ("Congratulations on the new high score!");
         }
+        return messages;
     }
 
     public List<HighScoreEntry> getHighScores() {
         return highScores;
     }
 
-    public void displayHighScores() {
-        System.out.println("High Scores:");
+    public List<String> displayHighScores() {
+        List<String> messages = new ArrayList<>();
+        messages.add("High Scores:");
         if (highScores.isEmpty()) {
-            System.out.println("No high scores found - play a game first");
+            messages.add("No high scores found - play a game first");
         } else {
             for (int i = 0; i < highScores.size(); i++) {
-                System.out.println("#" + (i + 1) + " " + highScores.get(i).toString());
+                messages.add("#" + (i + 1) + " " + highScores.get(i).toString());
             }
         }
-        System.out.println();
+        messages.add("");
+        return messages;
     }
 
     public void saveHighScores() {

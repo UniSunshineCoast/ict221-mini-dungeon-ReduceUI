@@ -7,7 +7,7 @@
 
 <BorderPane prefHeight="453.0" prefWidth="623.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dungeon.gui.Controller">
     <left>
-        <VBox alignment="TOP_CENTER" prefHeight="454.0" prefWidth="190.0" spacing="5.0" BorderPane.alignment="CENTER">
+        <VBox alignment="TOP_CENTER" prefHeight="320.0" prefWidth="190.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
             <HBox alignment="CENTER" prefHeight="54.0" prefWidth="159.0">
                <children>
@@ -51,16 +51,17 @@
                   <Insets />
                </VBox.margin>
                 </GridPane>
-            <TextArea fx:id="textArea" prefHeight="150.0" prefWidth="203.0" wrapText="true">
+            <TextArea fx:id="textArea" prefHeight="250.0" prefWidth="170.0" wrapText="true">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
                <padding>
-                  <Insets top="10.0" />
+                  <Insets top="5.0" />
                </padding></TextArea>
             <TilePane alignment="CENTER" hgap="10.0" prefHeight="100.0" prefWidth="159.0" vgap="10.0">
                <children>
                   <Button fx:id="startBn" mnemonicParsing="false" prefWidth="55.0" text="Start" />
+                  <Button fx:id="helpBn" layoutX="34.0" layoutY="19.0" mnemonicParsing="false" prefWidth="55.0" text="Help" />
                   <Button fx:id="saveBn" mnemonicParsing="false" prefWidth="55.0" text="Save" />
                   <Button fx:id="loadBn" mnemonicParsing="false" prefWidth="55.0" text="Load" />
                   <Button fx:id="quitBn" mnemonicParsing="false" prefWidth="55.0" text="Quit" />

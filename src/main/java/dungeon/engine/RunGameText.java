@@ -1,6 +1,7 @@
 package dungeon.engine;
 
 
+import java.util.List;
 import java.util.Scanner;
 
 public class RunGameText {
@@ -13,20 +14,27 @@ public class RunGameText {
         this.scanner = new Scanner(System.in);
     }
 
+    private void displayGameMessages(){
+        List<String> messages = engine.Messages();
+        for (String message : messages){
+            System.out.println(message);
+        }
+    }
+
     public void startGame(){
         System.out.println("Welcome to Mini Dungeon!");
         int difficulty = difficultyDefault;
         boolean loadChoice = promptForLoad();
         if (!loadChoice) difficulty = promptForDifficulty();
         engine = new gameEngine(loadChoice, difficulty);
-        System.out.println(engine.getMyString());
 
-        while(!engine.getGameOver()){
+        while(!engine.isGameOver()){
             displayGame();
             getPlayerInput();
-            if (!engine.getGameOver()){
-                engine.processGameTurn();
+            if (!engine.isGameOver()){
+                engine.processGameTurn(); //clears msgs
             }
+            displayGameMessages();
         }
         scanner.close();
     }
@@ -94,12 +102,7 @@ public class RunGameText {
     }
 
     private void movePlayer(int dx, int dy, String direction) {
-        boolean playerMoved = engine.processPlayerMove(dx, dy);
-        if (playerMoved) {
-            System.out.println("\nYou moved " + direction + " one step.");
-        } else {
-            System.out.println("\nYou tried to move " + direction + " one step but it is a wall.");
-        }
+        engine.processPlayerMove(dx, dy, direction);
     }
 
     public static void main(String[] args){

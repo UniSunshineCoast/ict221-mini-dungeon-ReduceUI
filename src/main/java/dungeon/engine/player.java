@@ -1,5 +1,8 @@
 package dungeon.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class player {
     private int x;
     private int y;
@@ -31,7 +34,6 @@ public class player {
         this.health = health;
     }
 
-
     public void takeDamage(int damage) {
         health -= damage;
         if (health > 10) {
@@ -39,7 +41,8 @@ public class player {
         }
     }
 
-    public Boolean move(int dx, int dy, map map) {
+    public List<String> move(int dx, int dy, map map, String direction) {
+        List<String> messages = new ArrayList<>();
         int newX = x + dx;
         int newY = y + dy;
         if (map.getCell(newX, newY) != null && map.getCell(newX, newY).isWalkable()) {
@@ -47,9 +50,10 @@ public class player {
             x = newX;
             y = newY;
             map.getCell(x, y).setPlayer(this);
-            return true;
+            messages.add("You moved " + direction + " one step.");
         } else {
-            return false;
+            messages.add("You tried to move " + direction + " one step but it is a wall.");
         }
+        return messages;
     }
 }

@@ -17,26 +17,25 @@ public class gameEngine {
     private int previousExitX;
     private int previousExitY;
     private int moves;
-    private boolean lastMove;
     private List<Enemy> meleeList;
     private List<Enemy> rangedList;
     private int difficulty = 4;
-    private boolean difficultySet = false;
     private final ScoreManager scoreManager;
     private final SaverLoader saverLoader;
     private boolean gameLoaded;
     private boolean isClimbingLadder;
-    private String myString;
+    private List<String> currentTurnMessages;
+    private List<String> meleeMessages;
 
     public gameEngine(boolean loadChoice, int difficulty) {
-
         this.scoreManager = new ScoreManager();
         this.saverLoader = new SaverLoader();
         this.difficulty = difficulty;
         this.gameLoaded = false;
         this.gameOver = false;
         this.isClimbingLadder = false;
-        this.myString = "3";
+        this.currentTurnMessages = new ArrayList<>();
+        this.meleeList = new ArrayList<>();
 
         if (loadChoice) {
             if (!loadGame()) {
@@ -58,14 +57,13 @@ public class gameEngine {
         this.previousExitX = 0; //initialise as level 1 start position
         this.previousExitY = 9;
         this.moves = 100;
-        this.lastMove = false;
+        currentTurnMessages.clear();
         startLevel();
     }
 
     private void startLevel() {
         this.map = new map(10, this);
-        myString = "\nStarting level " + level + " - Difficulty " + difficulty;
-//        System.out.println(myString);
+        addGameMessage("Starting level " + level + " - Difficulty " + difficulty);
         player = new player(previousExitX, previousExitY, health);
         map.placePlayer(player);
         map.placeLadder();
@@ -129,52 +127,57 @@ public class gameEngine {
 
     public void processGameTurn() {
         if (gameOver) return;
+
         handleInteractions();
+        moveEnemies();
         if (moves == 0) setGameOver(true);
         if (level > maxLevel) setGameOver(true);
         if (player.getHealth() <= 0) setGameOver(true);
-        if (gameOver) handleGameOver();
-        if (!gameOver) moveEnemies();
+        if (gameOver) {
+            handleGameOver();
+            processScores();
+        }
     }
 
-    public boolean processPlayerMove(int dx, int dy) {
-        boolean success = player.move(dx, dy, map);
-        if (success) {
-            moves--;
-            return true;
-        } else {
-            return false;
-        }
+    public void processPlayerMove(int dx, int dy, String direction) {
+        currentTurnMessages.clear();
+        List<String> playerMessages = player.move(dx, dy, map, direction);
+        currentTurnMessages.addAll(playerMessages);
+        moves--;
     }
 
     public void handleGameOver() {
         if (moves == 0) {
-            System.out.println("Game Over - No more moves left");
+            addGameMessage("Game Over - No more moves left");
             score = -1;
         } else if (player.getHealth() <= 0) {
-            System.out.println("Game Over - You ran out of health");
+            addGameMessage("Game Over - You ran out of health");
             score = -1;
         } else if (level > maxLevel) {
-            System.out.println("Congratulations - You have completed the Dungeon");
+            addGameMessage("Congratulations - You have completed the Dungeon");
         } else {
-            System.out.println("Game Over - Deciding to leave already?");
-            score = -1;
+            addGameMessage("Deciding to leave already?");
         }
+        addGameMessage("Final Score: " + score);
+    }
 
-        System.out.println("Final Score: " + score);
-        scoreManager.addScore(score);
-        scoreManager.displayHighScores();
-
+    public void processScores() {
+        List<String> scoreMessages = scoreManager.addScore(score);
+        currentTurnMessages.addAll(scoreMessages);
+        List<String> highScoreMessages = scoreManager.displayHighScores();
+        currentTurnMessages.addAll(highScoreMessages);
         scoreManager.saveHighScores();
     }
 
     private void moveEnemies() {
-        if (!isClimbingLadder) {
+        if (isClimbingLadder) return; {
             for (Enemy enemy : meleeList) {
-                enemy.move(map, player);
+                meleeMessages = enemy.move(map, player);
+                currentTurnMessages.addAll(meleeMessages);
             }
             for (Enemy enemy : rangedList) {
-                enemy.move(map, player);
+                List<String> rangedMessages = enemy.move(map, player);
+                currentTurnMessages.addAll(rangedMessages);
             }
         }
         isClimbingLadder = false;
@@ -182,12 +185,11 @@ public class gameEngine {
 
     private void handleInteractions() {
         cell playerCell = map.getCell(player.getX(), player.getY());
-
         //Check for ladder/exit
         if (playerCell.hasLadder()) {
             difficulty += 2;
             level++;
-            if (level >= maxLevel) {
+            if (level <= maxLevel) {
                 previousExitX = player.getX();
                 previousExitY = player.getY();
                 health = player.getHealth();
@@ -202,19 +204,19 @@ public class gameEngine {
             switch (item) {
                 case Gold gold -> {
                     score += gold.getValue();
-                    System.out.println("You picked up a gold.");
+                    addGameMessage("You picked up a gold.");
                     playerCell.setItem(null);
                 }
                 case Trap trap -> {
                     player.takeDamage(trap.getDamage());
-                    System.out.println("You fell into a trap.");
+                    addGameMessage("You fell into a trap.");
                 }
                 case Heal heal -> {
                     player.takeDamage(heal.getHealValue() * -1);
-                    System.out.println("You drank a health potion.");
+                    addGameMessage("You drank a health potion.");
                     playerCell.setItem(null);
                 }
-                case null, default -> System.out.println("Invalid item");
+                case null, default -> addGameMessage("Invalid item");
             }
         }
 
@@ -226,13 +228,17 @@ public class gameEngine {
             if (enemy instanceof Melee) {
                 player.takeDamage(enemy.getAttackDamage());
                 meleeList.remove(enemy);
-                System.out.println("You attacked a melee mutant and wins."); // "wins" as per design document.
+                addGameMessage("You defeated a melee mutant, but you lost " + enemy.getAttackDamage() + " HP.");
             } else if (enemy instanceof Ranged) {
                 rangedList.remove(enemy);
-                System.out.println("You attacked a ranged mutant and wins.");
+                addGameMessage("You defeated a ranged mutant.");
             }
             playerCell.setEnemy(null);
         }
+    }
+
+    public void addGameMessage(String msg){
+        currentTurnMessages.add(msg);
     }
 
     public void saveGame() {
@@ -251,7 +257,8 @@ public class gameEngine {
             this.rangedList = loadedState.getRangedList();
             this.difficulty = loadedState.getDifficulty();
             this.gameLoaded = true;
-            System.out.printf("Continuing level %d - Difficulty %d\n", level, difficulty);
+            addGameMessage("\nContinuing level " + level + " - Difficulty " + difficulty);
+
             return true;
         }
         return false;
@@ -261,33 +268,16 @@ public class gameEngine {
         return difficulty;
     }
 
-    public void setDifficulty(int difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
     public int getMoves() {
         return moves;
     }
 
     public int getHealth() {
         return player.getHealth();
-
     }
 
     public int getScore() {
         return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
     }
 
     public map getMap() {
@@ -298,20 +288,8 @@ public class gameEngine {
         this.gameOver = bool;
     }
 
-    public boolean getGameOver() {
+    public boolean isGameOver() {
         return gameOver;
-    }
-
-    public ScoreManager getScoreManager() {
-        return scoreManager;
-    }
-
-    public boolean isDifficultySet() {
-        return difficultySet;
-    }
-
-    public void setDifficultySet(boolean difficultySet) {
-        this.difficultySet = difficultySet;
     }
 
     public boolean isGameLoaded() {
@@ -325,7 +303,7 @@ public class gameEngine {
         return previousExitY;
     }
 
-    public String getMyString() {
-        return myString;
+    public List<String> Messages() {
+        return currentTurnMessages;
     }
 }
