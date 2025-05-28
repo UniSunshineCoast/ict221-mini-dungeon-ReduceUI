@@ -14,17 +14,17 @@ import java.util.Optional;
 
 public class Controller {
     @FXML private Button upBn;
-    @FXML public Button leftBn;
-    @FXML public Button rightBn;
-    @FXML public Button downBn;
-    @FXML public TextArea textArea;
-    @FXML public Button startBn;
-    @FXML public Button helpBn;
-    @FXML public Button saveBn;
-    @FXML public Button loadBn;
-    @FXML public Button quitBn;
-    @FXML public Label difficultyLabel;
-    @FXML public Slider difficultySlider;
+    @FXML private Button leftBn;
+    @FXML private Button rightBn;
+    @FXML private Button downBn;
+    @FXML private TextArea textArea;
+    @FXML private Button startBn;
+    @FXML private Button helpBn;
+    @FXML private Button saveBn;
+    @FXML private Button loadBn;
+    @FXML private Button quitBn;
+    @FXML private Label difficultyLabel;
+    @FXML private Slider difficultySlider;
     @FXML private GridPane gridPane;
 
     private gameEngine engine;
